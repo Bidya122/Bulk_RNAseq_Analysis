@@ -51,9 +51,37 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 **Lets Start with the Workflow, Since my laptop has very low RAM and cannot support the analysis, I chose to perform the work on Google Cloud Platform (GCP). This not only solves the hardware limitation but also provides me with valuable experience in cloud computing.**
 *Set up Google Cloud Console*  
 - Login with your gmail-id.
+- Click on **console** on the top right near your account info.
+  <img width="91" height="57" alt="image" src="https://github.com/user-attachments/assets/b7cf3086-55e8-409a-820a-76354fcd8531" />
+
 - On left corner click the menu (three lines)  
   <img width="194" height="50" alt="image" src="https://github.com/user-attachments/assets/521a04e2-b23f-40de-a8a9-ccf3bda93064" />
+
+- click on Compute Engine and then on the sublist click VM Instances.(This is going to be your Virtual Machine)
+- Click **Enable** Computer Engine API
+- Then, set the billing account.(paid or free account-as you wish!)
+- Click on **+ Create Instance**. You will see this kind of window,  
+  <img width="1013" height="587" alt="image" src="https://github.com/user-attachments/assets/611d7316-98b0-4775-bbab-d654f9f49b75" />
+
+- On left, as shown in the screenshot, There is an option called **Machine Configuration** make sure you are there to see these options
+- You can name your project as you like, and fill out the machine details as required by your specifications.
+  Name: bulk-rna-seq-vm  
+  Region and Zone: Which ever is nearest to you.
+  Select machine type as E2  
+  <img width="734" height="154" alt="image" src="https://github.com/user-attachments/assets/4bf5443d-7f8e-4bbd-a3b2-bc7237165b2b" />
+  Scroll down, you will see
+  <img width="745" height="273" alt="image" src="https://github.com/user-attachments/assets/99af91f1-6b7e-4527-91ba-67874e28910f" />
+  click Standard > your choice of machine you want
+  <img width="683" height="257" alt="image" src="https://github.com/user-attachments/assets/e6cec3de-2a32-49a1-af50-681b07ef07a7" />
+
+- On left, click **OS and Storage**
   
+
+
+
+
+
+
 
 
 
