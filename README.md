@@ -120,17 +120,82 @@ sudo apt install -y ./rstudio-server-2025.09.0-387-amd64.deb
 ```bash
 sudo rstudio-server start
 ```
+After this, you have to set up the firewall rule for your VM. 
+Again go to Google Cloud Console and click the menu:  
+ <img width="194" height="50" alt="image" src="https://github.com/user-attachments/assets/521a04e2-b23f-40de-a8a9-ccf3bda93064" />  
+**On MENU, click VPC Network > Firewall > + create Firewall Rule**
+Name: rstudio-server
+Network: default
+Targets: All instances in the network
+Source\Prangs: 0.0.0.0/0
+Protocols and Ports: click specified protocols and ports
+                     enter 8787 
+Now on your Browser.. type (external IP you can find on VM Instances)
+```bash
+http://your_external_IP:8787
+```
+Then, type in your username and password. R-Studio could be used now. 
 
+**SRA Toolkit Installation - necessary to access, download, and convert sequencing data from the NCBI Sequence Read Archive (SRA) into usable formats for analysis.**  
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+```bash
+sudo apt install sra-toolkit -y
+```
+```bash
+which prefetch
+```
+```bash
+which fastq-dump
+```
+**Fastq Installation.**  
+```bash
+sudo apt install fastqc -y
+```
+```bash
+fastqc --version
+```
+**Multiqc Installation.**  
+```bash
+python3 -m pip install --upgrade pip
+```
+```bash
+pip install multiqc
+```
+```bash
+multiqc --version
+```
+**Trimmomatic Installation**
+(on home directory)
+```bash
+mkdir -p ~/tools
+```
+```bash
+cd ~/tools
+```
+```bash
+wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
+```
+```bash
+unzip Trimmomatic-0.39.zip
+```
+```bash
+ls
+```
+```bash
+cd Trimmomatic-0.39
+```
+you should see this  
+<img width="337" height="22" alt="image" src="https://github.com/user-attachments/assets/7d19209d-fbe0-4dca-a66d-86031af7d4cd" />  
 
-
-
-
-
-
-
-
-
-
+**Hisat2 Installation**
+```bash
+sudo apt install hisat2 -y
+```
+```bash
+hisat2 --version
+```
 
 
 
