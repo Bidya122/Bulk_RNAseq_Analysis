@@ -1,6 +1,7 @@
 # Bulk_RNAseq_Analysis
 This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis.
-*ONECUT2 and Hypoxia Signaling in Neuroendocrine Prostate Cancer*
+**ONECUT2 and Hypoxia Signaling in Neuroendocrine Prostate Cancer**
+
 Experimental Design
 This repository contains datasets and analysis scripts for studying the role of ONECUT2 (OC2) in hypoxia signaling in prostate cancer. The experiments were performed using LNCaP and PC3 prostate cancer cell lines under normoxia and hypoxia conditions.
 
