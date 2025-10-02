@@ -88,9 +88,10 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
 -Just click **Create** and its done. Voila!! you have your VM. It will take a couple of minutes and the window will open. You can see your VM name and a green tick near it which means its running. Click on **SSH** button and your terminal will open.  
 
+
 ## Setting up the terminal and Installation of Tools.  
 
-Update and upgrade system packages
+**Update and upgrade system packages**
 ```bash 
 sudo apt update && sudo apt upgrade -y
 ```
@@ -98,7 +99,7 @@ Install essential tools
 ```bash 
 sudo apt install -y build-essential wget curl git unzip htop
 ```
-R Installation, it installs the base R interpreter and standard R libraries  
+**R Installation, it installs the base R interpreter and standard R libraries**  
 ```bash 
 sudo apt install -y -r base
 ```
