@@ -1,7 +1,7 @@
 # Bulk_RNAseq_Analysis
 This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis.
 
-**ONECUT2 and Hypoxia Signaling in Neuroendocrine Prostate Cancer**  
+**ONECUT2 Signaling Role in Normoxia and Hypoxia Condition for Neuroendocrine Prostate Cancer**  
 Experimental Design:  
 This repository contains datasets and analysis scripts for studying the role of ONECUT2 (OC2) in hypoxia signaling in prostate cancer. The experiments were performed using LNCaP and PC3 prostate cancer cell lines under normoxia and hypoxia conditions.
 
@@ -90,6 +90,7 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
 
 ## Setting up the terminal and Installation of Tools.  
+I have written the installation steps first, rather than writing it during the workflow. You can do it one by one during each step of the analysis or however you wish. My intention was to have a clear workflow with clear steps.
 
 **Update and upgrade system packages**
 ```bash 
@@ -196,12 +197,31 @@ sudo apt install hisat2 -y
 ```bash
 hisat2 --version
 ```
-
-
-
-
-
-
+**Samtools Installation**
+```bash
+sudo apt install samtools
+```
+**Qualimap Installation**
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh  
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+```bash
+source ~/.bashrc
+```
+```bash
+conda --version
+```
+```bash
+conda install -c bioconda qualimap
+```
+```bash
+qualimap --version 
+```
+to come out of conda base
+```bash
+conda config --set auto_activate_base false
+```
 
 
 
