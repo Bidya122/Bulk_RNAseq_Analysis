@@ -90,17 +90,35 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
 ## Setting up the terminal and Installation of Tools.  
 
-# Update and upgrade system packages
+Update and upgrade system packages
 ```bash 
 sudo apt update && sudo apt upgrade -y
 ```
-# Install essential tools
+Install essential tools
 ```bash 
 sudo apt install -y build-essential wget curl git unzip htop
 ```
-
-
-
+R Installation, it installs the base R interpreter and standard R libraries  
+```bash 
+sudo apt install -y -r base
+```
+R-server Installation
+```bash
+sudo apt install gdebi-core -y
+```
+```bash
+wget https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2025.09.0-387-amd64.deb
+```
+```bash
+sudo gdebi rstudio-server-2025.09.0-387-amd64.deb
+```
+(alternative without gdebi)
+```bash
+sudo apt install -y ./rstudio-server-2025.09.0-387-amd64.deb
+```
+```bash
+sudo rstudio-server start
+```
 
 
 
