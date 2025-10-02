@@ -83,12 +83,16 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
   Select Ubuntu and other requirements, it should look something like this,
   <img width="456" height="189" alt="image" src="https://github.com/user-attachments/assets/b2f82550-19df-4e1e-885f-638be142dfca" />
 
--On left, click **Networking**  
+- On left, click **Networking**  
 <img width="655" height="480" alt="image" src="https://github.com/user-attachments/assets/9400867c-2462-40c6-b46c-d946c7a25302" />  
 
 -Just click **Create** and its done. Voila!! you have your VM. It will take a couple of minutes and the window will open. You can see your VM name and a green tick near it which means its running. Click on **SSH** button and your terminal will open.  
 
+## Setting up the terminal and Installation of Tools.  
 
+'''bash 
+sudo apt update && sudo apt upgrade -y
+'''
 
 
 
