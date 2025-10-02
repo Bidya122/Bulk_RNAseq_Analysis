@@ -43,3 +43,6 @@ Integrate RNA-Seq and ChIP-Seq data to elucidate hypoxia-mediated gene regulatio
 Explore transcription factor interactions under hypoxia conditions
 
 <img width="455" height="535" alt="image" src="https://github.com/user-attachments/assets/9d8f5783-3134-40fe-acbc-3e6cf1e449fe" />
+
+<img width="545" height="356" alt="image" src="https://github.com/user-attachments/assets/348328ac-c1cf-4ad1-83bf-d9f37a6483ef" />
+Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
