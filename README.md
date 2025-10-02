@@ -90,9 +90,9 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
 ## Setting up the terminal and Installation of Tools.  
 
-'''bash 
+```bash 
 sudo apt update && sudo apt upgrade -y
-'''
+```
 
 
 
