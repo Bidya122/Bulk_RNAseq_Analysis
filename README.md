@@ -90,10 +90,14 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
 ## Setting up the terminal and Installation of Tools.  
 
+# Update and upgrade system packages
 ```bash 
 sudo apt update && sudo apt upgrade -y
 ```
-
+# Install essential tools
+```bash 
+sudo apt install -y build-essential wget curl git unzip htop
+```
 
 
 
