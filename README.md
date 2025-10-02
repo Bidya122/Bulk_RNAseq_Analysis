@@ -124,12 +124,12 @@ After this, you have to set up the firewall rule for your VM.
 Again go to Google Cloud Console and click the menu:  
  <img width="194" height="50" alt="image" src="https://github.com/user-attachments/assets/521a04e2-b23f-40de-a8a9-ccf3bda93064" />  
 **On MENU, click VPC Network > Firewall > + create Firewall Rule**
-Name: rstudio-server
-Network: default
-Targets: All instances in the network
-Source\Prangs: 0.0.0.0/0
-Protocols and Ports: click specified protocols and ports
-                     enter 8787 
+Name: rstudio-server  
+Network: default  
+Targets: All instances in the network  
+Source\Prangs: 0.0.0.0/0  
+Protocols and Ports: click specified protocols and ports  
+                     enter 8787   
 Now on your Browser.. type (external IP you can find on VM Instances)
 ```bash
 http://your_external_IP:8787
