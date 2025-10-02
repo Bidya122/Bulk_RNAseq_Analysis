@@ -5,24 +5,24 @@ This repository contains scripts, workflows, and documentation for performing bu
 Experimental Design:  
 This repository contains datasets and analysis scripts for studying the role of ONECUT2 (OC2) in hypoxia signaling in prostate cancer. The experiments were performed using LNCaP and PC3 prostate cancer cell lines under normoxia and hypoxia conditions.
 
-*RNA-Seq*
+**RNA-Seq**  
 LNCaP cells: OC2 overexpression vs. control
 PC3 cells: OC2 knockdown vs. control
 Goal: Identify OC2-regulated gene expression changes under different oxygen conditions.
 
-*ChIP-Seq*
+**ChIP-Seq**  
 PC3 cells with Flag-OC2 fusion protein: anti-Flag ChIP to map OC2 binding sites
 HIF1A ChIP-Seq: AR-negative PC3 cells under hypoxia ± ONECUT2 or SMAD3 knockdown
 SMAD3 and HIF2A ChIP-Seq: PC3 cells under hypoxia
 Goal: Map transcription factor binding sites and identify OC2 targets in hypoxia response.
 
-*ChIP-reChIP-Seq*
+**ChIP-reChIP-Seq**  
 Sequential ChIP experiments to study co-binding of transcription factors:
 Primary ChIP using anti-SMAD3 antibody
 ReChIP using anti-HIF1A or anti-HIF2A antibodies
 Goal: Identify genomic regions co-bound by multiple transcription factors.
 
-*Dataset Metadata*
+**Dataset Metadata**  
 Field	Value
 SRA Study	SRP122890
 BioProject	PRJNA416257
