@@ -48,4 +48,27 @@ Explore transcription factor interactions under hypoxia conditions
 <img width="545" height="356" alt="image" src="https://github.com/user-attachments/assets/348328ac-c1cf-4ad1-83bf-d9f37a6483ef" />
 Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
-Lets Start with the Workflow, 
+**Lets Start with the Workflow, Since my laptop has very low RAM and cannot support the analysis, I chose to perform the work on Google Cloud Platform (GCP). This not only solves the hardware limitation but also provides me with valuable experience in cloud computing.**
+*Set up Google Cloud Console*  
+- Login with your gmail-id.
+- On left corner click the menu (three lines)
+  <img width="194" height="50" alt="image" src="https://github.com/user-attachments/assets/521a04e2-b23f-40de-a8a9-ccf3bda93064" />
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
