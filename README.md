@@ -3,7 +3,7 @@ This repository contains scripts, workflows, and documentation for performing bu
 
 **ONECUT2 Signaling Role in Normoxia and Hypoxia Condition for Neuroendocrine Prostate Cancer**  
 Experimental Design:  
-This repository contains datasets and analysis scripts for studying the role of ONECUT2 (OC2) in hypoxia signaling in prostate cancer. The experiments were performed using LNCaP and PC3 prostate cancer cell lines under normoxia and hypoxia conditions.
+This repository contains datasets and analysis scripts for studying the role of ONECUT2 (OC2) signaling in prostate cancer in Normoxia and Hypoxia conditions. The experiments were performed using LNCaP and PC3 prostate cancer cell lines under normoxia and hypoxia conditions.
 
 **RNA-Seq**  
 LNCaP cells: OC2 overexpression vs. control
@@ -222,9 +222,25 @@ to come out of conda base
 ```bash
 conda config --set auto_activate_base false
 ```
-
-
-
+**Install Subread**
+```bash
+sudo apt install subread
+```
+## Workflow Starts:
+Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few points to remember:  
+- Please be careful about the directories you will be making. Be careful about where you are saving your results.  
+- In any script, the most important thing to keep in mind is the path of the file that the script is fetching and the output directory of the output files.  
+- Also be mindful of the files you will be downloading, before downloading double check the working dir.  
+- The path and the file names could be different, also the tools if you choose to work with anything different.  
+- Let's START!! 
+**DATASET DOWNLOADING**
+I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
+For that I have used fastq_download.py FASTQ is the raw sequencing reads from a sequencing machine (like Illumina). Each read is basically the DNA or RNA fragment that was sequenced. FASTQ files contain both the sequence and the quality scores for each base. In the downstream I have attached an example of the how the file looks.  
+*Command/Script Explanation: Download raw SRA files from NCBI > Convert them to FASTQ files ready for RNA-Seq analysis > Compress and organize the reads automatically > Reports the time taken for each step.
+```bash
+#for a new folder named bulk_RNA_analysis
+mkdir -p ~/bulk_RNA_analysis 
+```
 
 
 
