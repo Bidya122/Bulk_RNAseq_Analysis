@@ -259,6 +259,7 @@ python3 fastq_download.py
 <img width="940" height="105" alt="image" src="https://github.com/user-attachments/assets/f7e17d06-d30c-4911-848e-fbaae3289af9" />  
 <img width="940" height="70" alt="image" src="https://github.com/user-attachments/assets/23cc73e5-6d96-4855-ab27-ee278f16cae0" />  
 
+
 **2. ORGANIZING DATASET (CONCATENATE & RENAMING)**  
 
 As I am working with publicly available dataset it was done as a preprocessing step before actually running the analysis on it. As we saw it from the data base SRR7179504, SRR7179505, SRR7179506, SRR7179507 are all pieces of the same biological sample (LNCAP_Normoxia_S1) so I just joined it together so the results are not messy later on. 
@@ -288,6 +289,7 @@ This is how the fastq file looks. It has four lines.. 1.Read Id starts with @ 2.
 
 <img width="940" height="85" alt="image" src="https://github.com/user-attachments/assets/f557eb5c-41e1-4267-bfec-7573d8442700" />
 
+
 **3. QUALITY CHECK**
 We perform quality checks (QC) on FASTQ files because raw sequencing data is noisy and error-prone. If we don’t check quality early, errors can propagate into alignment, quantification, and differential expression results. Fastqc tells us about read quality across the entire length, Detect adapter contamination, Identify overrepresented sequences, Helps detect technical artifacts, rRNA contamination, or PCR duplicates, Check GC content distribution, Ensure enough sequencing depth & uniformity and helps to Catch issues before wasting compute. 
 *Command/Script Explanation: fastq is the tool which I used to do this*
@@ -311,6 +313,7 @@ multiqc fastqc_results/ -o multiqc_report/
 
 
 **Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder**  
+
 
 **4. TRIMMING IF NEEDED**
 In RNA-Seq pipelines, trimming is often applied to remove adapter contamination and low-quality bases at the read ends, which can otherwise reduce alignment accuracy. To gain familiarity with preprocessing tools, I performed trimming on one FASTQ file (LNCAP_Hypoxia_S1.fastq.gz) using Trimmomatic. The trimmed file was then re-evaluated with FastQC to confirm the improvement in quality metrics. 
