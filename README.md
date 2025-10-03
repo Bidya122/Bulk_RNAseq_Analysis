@@ -232,11 +232,14 @@ Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few p
 - In any script, the most important thing to keep in mind is the path of the file that the script is fetching and the output directory of the output files.  
 - Also be mindful of the files you will be downloading, before downloading double check the working dir.  
 - The path and the file names could be different, also the tools if you choose to work with anything different.  
-- Let's START!! 
+- Let's START!!
+   
 **DATASET DOWNLOADING**
 I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
+
 For that I have used fastq_download.py FASTQ is the raw sequencing reads from a sequencing machine (like Illumina). Each read is basically the DNA or RNA fragment that was sequenced. FASTQ files contain both the sequence and the quality scores for each base. In the downstream I have attached an example of the how the file looks.  
 *Command/Script Explanation: Download raw SRA files from NCBI > Convert them to FASTQ files ready for RNA-Seq analysis > Compress and organize the reads automatically > Reports the time taken for each step.
+
 ```bash
 #for a new folder named bulk_RNA_analysis
 mkdir -p ~/bulk_RNA_analysis 
@@ -250,4 +253,9 @@ mv ~/fastq_download.py ~/bulk_RNA_analysis/
 #to run the .py file
 python3 fastq_download.py
 ```
+
+<img width="940" height="105" alt="image" src="https://github.com/user-attachments/assets/f7e17d06-d30c-4911-848e-fbaae3289af9" />  
+<img width="940" height="70" alt="image" src="https://github.com/user-attachments/assets/23cc73e5-6d96-4855-ab27-ee278f16cae0" />  
+
+
 
