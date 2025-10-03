@@ -245,5 +245,7 @@ mkdir -p ~/bulk_RNA_analysis
 #if you are working on a VM (GCP), upload the .py file first using the upload option on top right and move it into this dir  
 mv ~/fastq_download.py ~/bulk_RNA_analysis/
 ```
+All SRA files can be downloaded and converted to FASTQ using the provided Python script:
 
+[Download `fastq_download.py`](https://github.com/Bidya122/Bulk_RNAseq_Analysis/Data/fastq_download.py)
 
