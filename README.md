@@ -239,7 +239,7 @@ Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few p
 I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
 
 For that I have used fastq_download.py FASTQ is the raw sequencing reads from a sequencing machine (like Illumina). Each read is basically the DNA or RNA fragment that was sequenced. FASTQ files contain both the sequence and the quality scores for each base. In the downstream I have attached an example of the how the file looks.  
-*Command/Script Explanation: Download raw SRA files from NCBI > Convert them to FASTQ files ready for RNA-Seq analysis > Compress and organize the reads automatically > Reports the time taken for each step.
+*Command/Script Explanation: Download raw SRA files from NCBI > Convert them to FASTQ files ready for RNA-Seq analysis > Compress and organize the reads automatically > Reports the time taken for each step.*
 
 ```bash
 #for a new folder named bulk_RNA_analysis
@@ -261,6 +261,7 @@ python3 fastq_download.py
 **2. ORGANIZING DATASET (CONCATENATE & RENAMING)**  
 
 As I am working with publicly available dataset it was done as a preprocessing step before actually running the analysis on it. As we saw it from the data base SRR7179504, SRR7179505, SRR7179506, SRR7179507 are all pieces of the same biological sample (LNCAP_Normoxia_S1) so I just joined it together so the results are not messy later on. 
+*Command/Script Explanation: cat joins all files and puts into whatever is written after > . and mv moves the matter of one file to the other eg. matter from SRR7179536_pass.fastq.gz to PC3_Normoxia_S1.fastq.gz*
 ```bash
 #concatenating/joining to combine multiple sequencing runs into one file per sample
 cat SRR7179504_pass.fastq.gz SRR7179505_pass.fastq.gz SRR7179506_pass.fastq.gz SRR7179507_pass.fastq.gz  > LNCAP_Normoxia_S1.fastq.gz
@@ -280,5 +281,39 @@ after carefully viewing and making sure that we have all the required concatenat
 #removing SRR files for a clean folder
 rm SRR*
 ```
+<img width="940" height="49" alt="image" src="https://github.com/user-attachments/assets/ca66da82-5628-460b-b034-76089e479718" />  
+
+This is how the fastq file looks. It has four lines.. 1.Read Id starts with @ 2.Read sequence 3.somewhat same as first line starts with +  4.ASCII characters encoding phred quality scores  
+
+<img width="940" height="85" alt="image" src="https://github.com/user-attachments/assets/f557eb5c-41e1-4267-bfec-7573d8442700" />
+
+**3. QUALITY CHECK**
+We perform quality checks (QC) on FASTQ files because raw sequencing data is noisy and error-prone. If we don’t check quality early, errors can propagate into alignment, quantification, and differential expression results. Fastqc tells us about read quality across the entire length, Detect adapter contamination, Identify overrepresented sequences, Helps detect technical artifacts, rRNA contamination, or PCR duplicates, Check GC content distribution, Ensure enough sequencing depth & uniformity and helps to Catch issues before wasting compute. 
+*Command/Script Explanation: fastq is the tool which I used to do this*
+```bash
+mkdir -p fastqc_results
+```
+```bash
+#runs fastqc on the fastq.gz files and puts ouput in fastqc_results  
+fastqc *.fastq.gz -o fastqc_results/ --threads 8
+```
+<img width="940" height="145" alt="image" src="https://github.com/user-attachments/assets/eda30212-0af2-4ef2-aeb2-61e758368264" />  
+
+**you can find the fastqc html files on this repository in the Output > fastqc folder**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
