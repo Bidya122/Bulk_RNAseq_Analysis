@@ -250,7 +250,7 @@ mkdir -p ~/bulk_RNA_analysis
 #if you are working on a VM (GCP), upload the .py file first using the upload option on top right and move it into this dir  
 mv ~/fastq_download.py ~/bulk_RNA_analysis/
 ```
-**you can find the fastq_download.py file on this repository in the Data folder**
+**Please find the fastq_download.py file on this repository in the Data folder**
 ```bash
 #to run the .py file
 python3 fastq_download.py
@@ -300,7 +300,41 @@ fastqc *.fastq.gz -o fastqc_results/ --threads 8
 ```
 <img width="940" height="145" alt="image" src="https://github.com/user-attachments/assets/eda30212-0af2-4ef2-aeb2-61e758368264" />  
 
-**you can find the fastqc html files on this repository in the Output > fastqc folder**
+```bash
+mkdir -p multiqc_report
+```
+```bash
+#runs multiqc on the files in fastqc_results and puts the output in multiqc_report
+multiqc fastqc_results/ -o multiqc_report/
+```
+<img width="940" height="204" alt="image" src="https://github.com/user-attachments/assets/2b4fb960-a3f0-48fc-a65d-effd3f6b3c80" />  
+
+
+**Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder**  
+
+**4. TRIMMING IF NEEDED**
+In RNA-Seq pipelines, trimming is often applied to remove adapter contamination and low-quality bases at the read ends, which can otherwise reduce alignment accuracy. To gain familiarity with preprocessing tools, I performed trimming on one FASTQ file (LNCAP_Hypoxia_S1.fastq.gz) using Trimmomatic. The trimmed file was then re-evaluated with FastQC to confirm the improvement in quality metrics. 
+```bash
+#runs trimmomatic on the specified sample
+java -jar ~/tools/Trimmomatic-0.39/trimmomatic-0.39.jar SE -threads 4 \
+  ~/bulk_RNA_analysis/fastq/LNCAP_Hypoxia_S1.fastq.gz \
+  ~/bulk_RNA_analysis/fastq/LNCAP_Hypoxia_S1_trimmed.fastq.gz \
+  TRAILING:10 -phred33
+```
+<img width="940" height="107" alt="image" src="https://github.com/user-attachments/assets/2583d58b-edd1-4ee6-b601-8f748e1635e0" />  
+
+
+After trimming, the trimmed output was then re-evaluated with FastQC, which confirmed the expected improvement in quality metrics.
+
+```bash
+#runs fastqc on the trimmed fastq file
+fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
+```
+<img width="940" height="173" alt="image" src="https://github.com/user-attachments/assets/78a2d0f1-b35e-4ab0-8bc1-d01a890a0f64" />  
+
+**Please find the trimmedqc.sh file to perform QC with fastqcon the trimmed fastq files on this repository in the Output > Qualitycheck folder**  
+
+Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
 
 
 
