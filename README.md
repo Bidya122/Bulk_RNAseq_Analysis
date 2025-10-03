@@ -332,7 +332,7 @@ fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
 ```
 <img width="940" height="173" alt="image" src="https://github.com/user-attachments/assets/78a2d0f1-b35e-4ab0-8bc1-d01a890a0f64" />  
 
-**Please find the trimmedqc.sh file to perform QC with fastqcon the trimmed fastq files on this repository in the Output > Qualitycheck folder**  
+**Please find the trimmedqc.sh file to perform QC with fastqcon the trimmed fastq files on this repository in the Data folder**  
 
 Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
 
