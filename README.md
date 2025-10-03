@@ -234,7 +234,8 @@ Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few p
 - The path and the file names could be different, also the tools if you choose to work with anything different.  
 - Let's START!!
    
-**DATASET DOWNLOADING**
+**1. DATASET DOWNLOADING**
+
 I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
 
 For that I have used fastq_download.py FASTQ is the raw sequencing reads from a sequencing machine (like Illumina). Each read is basically the DNA or RNA fragment that was sequenced. FASTQ files contain both the sequence and the quality scores for each base. In the downstream I have attached an example of the how the file looks.  
@@ -257,5 +258,27 @@ python3 fastq_download.py
 <img width="940" height="105" alt="image" src="https://github.com/user-attachments/assets/f7e17d06-d30c-4911-848e-fbaae3289af9" />  
 <img width="940" height="70" alt="image" src="https://github.com/user-attachments/assets/23cc73e5-6d96-4855-ab27-ee278f16cae0" />  
 
+**2. ORGANIZING DATASET (CONCATENATE & RENAMING)**  
+
+As I am working with publicly available dataset it was done as a preprocessing step before actually running the analysis on it. As we saw it from the data base SRR7179504, SRR7179505, SRR7179506, SRR7179507 are all pieces of the same biological sample (LNCAP_Normoxia_S1) so I just joined it together so the results are not messy later on. 
+```bash
+#concatenating/joining to combine multiple sequencing runs into one file per sample
+cat SRR7179504_pass.fastq.gz SRR7179505_pass.fastq.gz SRR7179506_pass.fastq.gz SRR7179507_pass.fastq.gz  > LNCAP_Normoxia_S1.fastq.gz
+cat SRR7179508_pass.fastq.gz SRR7179509_pass.fastq.gz SRR7179510_pass.fastq.gz SRR7179511_pass.fastq.gz  > LNCAP_Normoxia_S2.fastq.gz
+cat SRR7179520_pass.fastq.gz SRR7179521_pass.fastq.gz SRR7179522_pass.fastq.gz SRR7179523_pass.fastq.gz  > LNCAP_Hypoxia_S1.fastq.gz
+cat SRR7179524_pass.fastq.gz SRR7179525_pass.fastq.gz SRR7179526_pass.fastq.gz SRR7179527_pass.fastq.gz  > LNCAP_Hypoxia_S2.fastq.gz
+```
+```bash
+#renaming to meaningful biological names
+mv SRR7179536_pass.fastq.gz PC3_Normoxia_S1.fastq.gz
+mv SRR7179537_pass.fastq.gz PC3_Normoxia_S2.fastq.gz
+mv SRR7179540_pass.fastq.gz PC3_Hypoxia_S1.fastq.gz
+mv SRR7179541_pass.fastq.gz PC3_Hypoxia_S2.fastq.gz
+```
+after carefully viewing and making sure that we have all the required concatenated and renamed files we can remove the SRR files. 
+```bash
+#removing SRR files for a clean folder
+rm SRR*
+```
 
 
