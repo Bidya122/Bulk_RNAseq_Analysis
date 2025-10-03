@@ -241,6 +241,9 @@ For that I have used fastq_download.py FASTQ is the raw sequencing reads from a 
 #for a new folder named bulk_RNA_analysis
 mkdir -p ~/bulk_RNA_analysis 
 ```
-
+```bash
+#if you are working on a VM (GCP), upload the .py file first using the upload option on top right and move it into this dir  
+mv ~/fastq_download.py ~/bulk_RNA_analysis/
+```
 
 
