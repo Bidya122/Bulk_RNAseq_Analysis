@@ -499,7 +499,24 @@ python3 countsmatrix_wholedata.py
 ```
 <img width="1346" height="467" alt="image" src="https://github.com/user-attachments/assets/76fd9be0-5d67-407a-a037-cd08f4011b62" />  
 
+To run R, I used the Google cloud console only for the generation of read count matrix using the R script Rscript_for_merging_featurecounts.R  
 
+(ON bash)
+```bash
+#to activate R on VM 
+sudo systemctl status rstudio-server #checks status
+```
+```bash
+#if shows inactive 
+sudo systemctl start rstudio-server
+```
+```bash
+#if shows inactive 
+sudo systemctl status rstudio-server 
+```
+<img width="940" height="238" alt="image" src="https://github.com/user-attachments/assets/2a78ee95-d92a-4551-8735-2acce8fcec84" />
+
+**Then go to browser and type URL - http://your_external_IP:8787 > then type in ur ID and password**  
 
 
 
