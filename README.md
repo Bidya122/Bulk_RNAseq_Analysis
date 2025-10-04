@@ -1,18 +1,20 @@
 # Bulk_RNAseq_Analysis
 
-## Table of Contents
-1. [Dataset Overview](#Introduction)
-2. [Google Cloud Setup](#Setting_up_google_cloud_console)
-3. [Installation of Tools](#Setting_up_the_terminal_and_Installation_of_Tools )
-4. [Data Downloading](#Dataset_Downloading)
-5. [Organizing Data](#ORGANIZING_DATASET_(CONCATENATE_&_RENAMING))
-6. [Quality Check](#QUALITY_CHECK)
-7. [Trimming](#TRIMMING_IF_NEEDED)
-8. [Alignment & Indexing](#INDEXING_AND_ALIGNMENT)
-9. [BAM File QC](#QUALITY_CHECK_OF_BAM_FILES)
-10. [Gene Quantification](#GENE_EXPRESSION_QUANTIFICATION_USING_FEATURECOUNTS)
-11. [Count Matrix Generation](#GENE-LEVEL_COUNT_MATRIX_GENERATION_(Python_&_R))
-12. [Downstream Analysis](#DOWNSTREAM_ANALYSIS)
+# Table of Contents
+
+1. [Dataset Overview](#introduction)
+2. [Google Cloud Setup](#setting-up-google-cloud-console)
+3. [Installation of Tools](#setting-up-the-terminal-and-installation-of-tools)
+4. [Data Downloading](#dataset-downloading)
+5. [Organizing Data (Concatenate & Rename)](#organizing-data-concatenate--rename)
+6. [Quality Check](#quality-check)
+7. [Trimming](#trimming-if-needed)
+8. [Alignment & Indexing](#indexing-and-alignment)
+9. [BAM File QC](#quality-check-of-bam-files)
+10. [Gene Quantification](#gene-expression-quantification-using-featurecounts)
+11. [Count Matrix Generation (Python & R)](#gene-level-count-matrix-generation-python--r)
+12. [Downstream Analysis](#downstream-analysis)
+
     
 # Introduction  
 This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis. All steps were implemented hands-on, including cloud-based setup, raw data processing, alignment, QC, and downstream analysis, demonstrating practical proficiency in RNA-Seq workflows.
