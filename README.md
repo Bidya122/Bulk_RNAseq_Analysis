@@ -64,7 +64,7 @@ Explore transcription factor interactions under hypoxia conditions
 
 Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
-# Setting up Google Cloud Console
+# Setting_up_Google_Cloud_Console
 
 **Lets Start with the Workflow, Since my laptop has very low RAM and cannot support the analysis, I chose to perform the work on Google Cloud Platform (GCP). This not only solves the hardware limitation but also provides me with valuable experience in cloud computing.**
 *Set up Google Cloud Console*  
