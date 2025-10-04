@@ -335,11 +335,62 @@ fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
 ```
 <img width="940" height="173" alt="image" src="https://github.com/user-attachments/assets/78a2d0f1-b35e-4ab0-8bc1-d01a890a0f64" />  
 
-**Please find the trimmedqc.sh file to perform QC with fastqcon the trimmed fastq files on this repository in the Data folder**  
+**Please find the trimmedqc.sh file to perform QC with fastqc on the trimmed fastq files on this repository in the Data folder**  
 
 Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
 
+**5. INDEXING AND ALIGNMENT**
+As the raw reads are processed, its time to align it to a reference genome. Because the genome is very huge its converted to genome indexes using hisat2-build. Before aligning RNA-Seq reads, HISAT2 requires a genome index. Instead of building it from scratch (which is time-consuming), I used a prebuilt GRCh38 human genome index provided by the HISAT2 team.It will align the single-end RNA-Seq FASTQ files against the HISAT2 genome index, then sort and index the BAM outputs with samtools. HISAT2 was used because of Lower memory requirement, Works well on modest VMs and has pre built indices.
 
+Prebuilt indexes available → Saves hours of index building.
+
+Easy integration
+In the same directory only,
+```bash
+#downloads the genome index
+wget https://genome-idx.s3.amazonaws.com/hisat/grch38_genome.tar.gz
+```
+```bash
+#unzips the index
+tar -xvzf grch38_genome.tar.gz
+
+<img width="936" height="26" alt="image" src="https://github.com/user-attachments/assets/b24050d3-00be-406a-a68c-8b57c8a7d035" />
+
+
+
+```
+On home dir,
+```bash
+#unzips the index
+cd ~/tools
+```
+```bash
+#Downloads Gene annotation file
+wget ftp://ftp.ensembl.org/pub/release-115/gtf/homo_sapiens/Homo_sapiens.GRCh38.115.gtf.gz
+```
+```bash
+#unzips the index
+gunzip Homo_sapiens.GRCh38.115.gtf.gz
+ls -lh Homo_sapiens.GRCh38.115.gtf
+```
+
+<img width="940" height="45" alt="image" src="https://github.com/user-attachments/assets/9ab0e67c-c4f0-48d4-ad34-9474116bef06" />  
+
+
+hisat2alignment.sh file was uploaded on GCP
+**Please find the hisat2alignment.sh file to perform alignment on the processed fastq files on this repository in the Data folder**  
+```bash
+#change the paths and folder names or any specifics  
+nano hisat2alignment.sh
+```
+```bash
+#make the.sh file executable and run
+chmod +x hisat2alignment.sh
+./hisat2alignment.sh
+```
+**FASTQ → (HISAT2) → SAM → (Samtools sort) → BAM → (Samtools index) → BAM + BAI**  
+
+<img width="940" height="148" alt="image" src="https://github.com/user-attachments/assets/a2530284-2fc2-4857-93a4-acccd54e50b5" />  
 
 
 
