@@ -314,7 +314,8 @@ multiqc fastqc_results/ -o multiqc_report/
 <img width="940" height="204" alt="image" src="https://github.com/user-attachments/assets/2b4fb960-a3f0-48fc-a65d-effd3f6b3c80" />  
 
 
-**Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder**  
+**Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder** 
+[Results of QC](/Output/Qualitycheck)  
 
 
 **4. TRIMMING IF NEEDED**
@@ -340,7 +341,10 @@ fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
 **Please find the trimmedqc.sh file to perform QC with fastqc on the trimmed fastq files on this repository in the Data folder**  
 [trimmedqc.sh](/Data)  
 
-Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
+Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.  
+
+[Results of QC](/Output/Qualitycheck)  
+
 
 **5. INDEXING AND ALIGNMENT**  
 
@@ -461,6 +465,10 @@ For each sample, the pipeline:
 - Stores detailed QC reports in a dedicated output folder per sample.  
 - Memory optimization ensured efficient processing with 12 GB allocated to Java (required by Qualimap).
 
+  [Results of QC](/Output/Qualimap_Reports)
+
+   
+
 **7. GENE EXPRESSION QUANTIFICATION USING FEATURECOUNTS**  
 
 - Performed gene-level read quantification from RNA-Seq alignments (BAM files) using FeatureCounts.  
@@ -531,6 +539,7 @@ sudo systemctl status rstudio-server
 **Then , Browser and type URL - http://your_external_IP:8787 > then type in ur ID and password and rn the script**  
 
 **-------- Downstream Processing for Differential Gene Expression Analysis Begins now on R -----------**
+
 
 
 
