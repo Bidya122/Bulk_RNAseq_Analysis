@@ -1,6 +1,6 @@
 # Bulk_RNAseq_Analysis
 
-Table of Contents
+# Table of Contents
 1. [Dataset Overview](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#introduction) 
 2. [Google Cloud Setup](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#setting_up_google_cloud_console) 
 3. [Installation of Tools](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#setting_up_the_terminal_and_installation_of_tools ) 
@@ -14,7 +14,10 @@ Table of Contents
 11. [Count Matrix Generation](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#8-gene-level_count_matrix_generation_python__r) 
 12. [Downstream Analysis](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#8-gene-level_count_matrix_generation_python__r)
 
-    
+[Find Scripts](https://github.com/Bidya122/Bulk_RNAseq_Analysis/tree/main/Data)
+[Find Output files](https://github.com/Bidya122/Bulk_RNAseq_Analysis/tree/main/Output)   
+
+
 # Introduction  
 This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis. All steps were implemented hands-on, including cloud-based setup, raw data processing, alignment, QC, and downstream analysis, demonstrating practical proficiency in RNA-Seq workflows.
 
