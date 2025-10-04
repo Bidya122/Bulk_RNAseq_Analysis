@@ -1,5 +1,6 @@
 # Bulk_RNAseq_Analysis
 
+[Downlaod Dataset](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#1-dataset_downloading)
 
     
 # Introduction  
