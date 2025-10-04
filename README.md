@@ -339,7 +339,8 @@ fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
 
 Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
 
-**5. INDEXING AND ALIGNMENT**
+**5. INDEXING AND ALIGNMENT**  
+
 As the raw reads are processed, its time to align it to a reference genome. Because the genome is very huge its converted to genome indexes using hisat2-build. Before aligning RNA-Seq reads, HISAT2 requires a genome index. Instead of building it from scratch (which is time-consuming), I used a prebuilt GRCh38 human genome index provided by the HISAT2 team.It will align the single-end RNA-Seq FASTQ files against the HISAT2 genome index, then sort and index the BAM outputs with samtools. HISAT2 was used because of Lower memory requirement, Works well on modest VMs and has pre built indices.
 
 Prebuilt indexes available → Saves hours of index building.
@@ -377,7 +378,7 @@ ls -lh Homo_sapiens.GRCh38.115.gtf
 <img width="940" height="45" alt="image" src="https://github.com/user-attachments/assets/9ab0e67c-c4f0-48d4-ad34-9474116bef06" />  
 
 
-hisat2alignment.sh file was uploaded on GCP
+hisat2alignment.sh file was uploaded on GCP  
 **Please find the hisat2alignment.sh file to perform alignment on the processed fastq files on this repository in the Data folder**  
 ```bash
 #change the paths and folder names or any specifics  
@@ -392,6 +393,8 @@ chmod +x hisat2alignment.sh
 
 <img width="940" height="148" alt="image" src="https://github.com/user-attachments/assets/a2530284-2fc2-4857-93a4-acccd54e50b5" />  
 
+**6. QUALITY CHECK OF BAM FILES**  
+After aligning RNA-Seq reads to the GRCh38 reference genome and generating sorted BAM files, I performed quality assessment using Qualimap. This tool evaluates mapping quality, coverage uniformity, strand specificity, duplication rates, and GC bias across the dataset. Running Qualimap ensures that the BAM files are of high quality before downstream analysis, such as gene quantification and differential expression. For RNA-Seq, the BAM files were analyzed against the Ensembl GTF annotation to generate comprehensive reports, including alignment statistics and coverage plots, facilitating early detection of potential issues in the sequencing or alignment process.
 
 
 
