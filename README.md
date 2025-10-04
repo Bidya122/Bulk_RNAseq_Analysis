@@ -1,19 +1,5 @@
 # Bulk_RNAseq_Analysis
 
-# Table of Contents
-
-1. [Dataset Overview](#introduction)
-2. [Google Cloud Setup](#setting)
-3. [Installation of Tools](#setting-up-the-terminal-and-installation-of-tools)
-4. [Data Downloading](#dataset-downloading)
-5. [Organizing Data (Concatenate & Rename)](#organizing-data-concatenate--rename)
-6. [Quality Check](#quality-check)
-7. [Trimming](#trimming-if-needed)
-8. [Alignment & Indexing](#indexing-and-alignment)
-9. [BAM File QC](#quality-check-of-bam-files)
-10. [Gene Quantification](#gene-expression-quantification-using-featurecounts)
-11. [Count Matrix Generation (Python & R)](#gene-level-count-matrix-generation-python--r)
-12. [Downstream Analysis](#downstream-analysis)
 
     
 # Introduction  
