@@ -3,15 +3,16 @@
 ## Table of Contents
 1. [Dataset Overview](#Introduction)
 2. [Google Cloud Setup](#Setting_up_google_cloud_console)
-3. [Installation of Tools](#installation-of-tools)
-4. [Data Downloading](#data-downloading)
-5. [Quality Control](#quality-control)
-6. [Trimming](#trimming)
-7. [Alignment & Indexing](#alignment--indexing)
-8. [BAM File QC](#bam-file-qc)
-9. [Gene Quantification](#gene-quantification)
-10. [Count Matrix Generation](#count-matrix-generation)
-11. [Downstream Analysis](#downstream-analysis)
+3. [Installation of Tools](#Setting_up_the_terminal_and_Installation_of_Tools )
+4. [Data Downloading](#DATASET_DOWNLOADING)
+5. [Organizing Data](#ORGANIZING_DATASET_(CONCATENATE_&_RENAMING))
+6. [Quality Check](#QUALITY_CHECK)
+7. [Trimming](#TRIMMING_IF_NEEDED)
+8. [Alignment & Indexing](#INDEXING_AND_ALIGNMENT)
+9. [BAM File QC](#QUALITY_CHECK_OF_BAM_FILES)
+10. [Gene Quantification](#GENE_EXPRESSION_QUANTIFICATION_USING_FEATURECOUNTS)
+11. [Count Matrix Generation](#GENE-LEVEL_COUNT_MATRIX_GENERATION_(Python_&_R))
+12. [Downstream Analysis](#DOWNSTREAM_ANALYSIS)
     
 # Introduction  
 This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis. All steps were implemented hands-on, including cloud-based setup, raw data processing, alignment, QC, and downstream analysis, demonstrating practical proficiency in RNA-Seq workflows.
@@ -105,7 +106,7 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 -Just click **Create** and its done. Voila!! you have your VM. It will take a couple of minutes and the window will open. You can see your VM name and a green tick near it which means its running. Click on **SSH** button and your terminal will open.  
 
 
-## Setting up the terminal and Installation of Tools.  
+## Setting_up_the_terminal_and_Installation_of_Tools  
 I have written the installation steps first, rather than writing it during the workflow. You can do it one by one during each step of the analysis or however you wish. My intention was to have a clear workflow with clear steps.
 
 **Update and upgrade system packages**
@@ -250,7 +251,7 @@ Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few p
 - The path and the file names could be different, also the tools if you choose to work with anything different.  
 - Let's START!!
    
-**1. DATASET DOWNLOADING**
+**1. DATASET_DOWNLOADING**
 
 I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
 
@@ -277,7 +278,7 @@ python3 fastq_download.py
 <img width="940" height="70" alt="image" src="https://github.com/user-attachments/assets/23cc73e5-6d96-4855-ab27-ee278f16cae0" />  
 
 
-**2. ORGANIZING DATASET (CONCATENATE & RENAMING)**  
+**2. ORGANIZING_DATASET_(CONCATENATE_&_RENAMING)**  
 
 As I am working with publicly available dataset it was done as a preprocessing step before actually running the analysis on it. As we saw it from the data base SRR7179504, SRR7179505, SRR7179506, SRR7179507 are all pieces of the same biological sample (LNCAP_Normoxia_S1) so I just joined it together so the results are not messy later on. 
 *Command/Script Explanation: cat joins all files and puts into whatever is written after > . and mv moves the matter of one file to the other eg. matter from SRR7179536_pass.fastq.gz to PC3_Normoxia_S1.fastq.gz*
@@ -307,7 +308,7 @@ This is how the fastq file looks. It has four lines.. 1.Read Id starts with @ 2.
 <img width="940" height="85" alt="image" src="https://github.com/user-attachments/assets/f557eb5c-41e1-4267-bfec-7573d8442700" />
 
 
-**3. QUALITY CHECK**
+**3. QUALITY_CHECK**
 We perform quality checks (QC) on FASTQ files because raw sequencing data is noisy and error-prone. If we don’t check quality early, errors can propagate into alignment, quantification, and differential expression results. Fastqc tells us about read quality across the entire length, Detect adapter contamination, Identify overrepresented sequences, Helps detect technical artifacts, rRNA contamination, or PCR duplicates, Check GC content distribution, Ensure enough sequencing depth & uniformity and helps to Catch issues before wasting compute. 
 *Command/Script Explanation: fastq is the tool which I used to do this*
 ```bash
@@ -333,7 +334,7 @@ multiqc fastqc_results/ -o multiqc_report/
 [Results of QC](/Output/Qualitycheck)  
 
 
-**4. TRIMMING IF NEEDED**
+**4. TRIMMING_IF_NEEDED**
 In RNA-Seq pipelines, trimming is often applied to remove adapter contamination and low-quality bases at the read ends, which can otherwise reduce alignment accuracy. To gain familiarity with preprocessing tools, I performed trimming on one FASTQ file (LNCAP_Hypoxia_S1.fastq.gz) using Trimmomatic. The trimmed file was then re-evaluated with FastQC to confirm the improvement in quality metrics. 
 ```bash
 #runs trimmomatic on the specified sample
@@ -361,7 +362,7 @@ Since overall FastQC/MultiQC reports showed consistently high Phred scores and n
 [Results of QC](/Output/Qualitycheck)  
 
 
-**5. INDEXING AND ALIGNMENT**  
+**5. INDEXING_AND_ALIGNMENT**  
 
 As the raw reads are processed, its time to align it to a reference genome. Because the genome is very huge its converted to genome indexes using hisat2-build. Before aligning RNA-Seq reads, HISAT2 requires a genome index. Instead of building it from scratch (which is time-consuming), I used a prebuilt GRCh38 human genome index provided by the HISAT2 team.It will align the single-end RNA-Seq FASTQ files against the HISAT2 genome index, then sort and index the BAM outputs with samtools. HISAT2 was used because of Lower memory requirement, Works well on modest VMs and has pre built indices.
 
@@ -443,7 +444,7 @@ Base and Quality: C @ QV 38 – The base at this position is C with a high quali
 Other fields (NH, NM, etc.) provide technical details about alignment, mismatches, or splicing.  
 
 
-**6. QUALITY CHECK OF BAM FILES**  
+**6. QUALITY_CHECK_OF_BAM_FILES**  
 
 After aligning RNA-Seq reads to the GRCh38 reference genome and generating sorted BAM files, I performed quality assessment using Qualimap. This tool evaluates mapping quality, coverage uniformity, strand specificity, duplication rates, and GC bias across the dataset. Running Qualimap ensures that the BAM files are of high quality before downstream analysis, such as gene quantification and differential expression. For RNA-Seq, the BAM files were analyzed against the Ensembl GTF annotation to generate comprehensive reports, including alignment statistics and coverage plots, facilitating early detection of potential issues in the sequencing or alignment process.
 **If qualimap is run immediately after installing it using conda it be can run using the following command immediately or first create conda base and then only it could be run**
@@ -484,7 +485,7 @@ For each sample, the pipeline:
 
    
 
-**7. GENE EXPRESSION QUANTIFICATION USING FEATURECOUNTS**  
+**7. GENE_EXPRESSION_QUANTIFICATION_USING_FEATURECOUNTS**  
 
 - Performed gene-level read quantification from RNA-Seq alignments (BAM files) using FeatureCounts.  
 - Assigned sequencing reads to genes based on exon overlap using the reference GTF annotation (GRCh38.115).  
@@ -507,7 +508,7 @@ chmod +x featurecounts.sh
 <img width="940" height="611" alt="image" src="https://github.com/user-attachments/assets/b557857c-d55f-48e6-8e49-0ce962c56c4b" />  
 <img width="940" height="94" alt="image" src="https://github.com/user-attachments/assets/6627cfc1-1a85-4231-af47-2257d34fef91" />  
 
-**7. GENE-LEVEL COUNT MATRIX GENERATION (Python & R)** 
+**7. GENE-LEVEL_COUNT_MATRIX_GENERATION_(Python_&_R)** 
 
 For the downstream analysis, and generating a count matrix I cumulated the featurecounts data for a count matrix and I tried my hands on both Python and R. The script ( Rscript_for_merging_featurecounts.R & countsmatrix_wholedata.py) for both is on Data folder in this repository. 
 
@@ -554,6 +555,7 @@ sudo systemctl status rstudio-server
 **Then , Browser and type URL - http://your_external_IP:8787 > then type in ur ID and password and rn the script**  
 
 **-------- Downstream Processing for Differential Gene Expression Analysis Begins now on R -----------**
+**8. DOWNSTREAM_ANALYSIS**
 
 
 
