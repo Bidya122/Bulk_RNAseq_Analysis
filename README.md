@@ -1,6 +1,18 @@
 # Bulk_RNAseq_Analysis
 
-[Downlaod Dataset](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#1-dataset_downloading)
+Table of Contents
+1. [Dataset Overview](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#introduction) 
+2. [Google Cloud Setup](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#setting_up_google_cloud_console) 
+3. [Installation of Tools](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#setting_up_the_terminal_and_installation_of_tools ) 
+4. [Data Downloading](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#1-dataset_downloading) 
+5. [Organizing Data](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#2-organizing_dataset_concatenate__renaming) 
+6. [Quality Check](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#3-quality_check) 
+7. [Trimming](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#4-trimming_if_needed) 
+8. [Alignment & Indexing](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#5-indexing_and_alignment) 
+9. [BAM File QC](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#6-quality_check_of_bam_files) 
+10. [Gene Quantification](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#7-gene_expression_quantification_using_featurecounts) 
+11. [Count Matrix Generation](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#8-gene-level_count_matrix_generation_python__r) 
+12. [Downstream Analysis](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#8-gene-level_count_matrix_generation_python__r)
 
     
 # Introduction  
