@@ -393,8 +393,73 @@ chmod +x hisat2alignment.sh
 
 <img width="940" height="148" alt="image" src="https://github.com/user-attachments/assets/a2530284-2fc2-4857-93a4-acccd54e50b5" />  
 
+Aligned RNA-Seq reads from the PC3 Normoxia sample (PC3_Normoxia_S1.bam) to the human reference genome (GRCh38) using HISAT2, and visualized the alignments in IGV. The IGV snapshot shows the coverage and individual read alignments for a selected region of chromosome 1, allowing verification of mapping quality and coverage depth. Junction tracks were also visualized to inspect potential splicing events.  
+Interpretation, In this region:  
+- Only a few reads align (very low coverage).  
+- There are no junction reads, suggesting it’s probably a continuous (non-spliced) region.  
+- You can visually confirm that your RNA-seq reads are aligning correctly to the reference genome.
+
+Tracks:
+There are three tracks loaded from the BAM file (PC3_Normoxia_S1.bam):
+Coverage Track (PC3_Normoxia_S1.bam Coverage) - Shows the depth of sequencing coverage at each position and The grey bars indicate how many reads cover each base.  
+Junction Track (PC3_Normoxia_S1.bam Junction) - Shows spliced alignments, i.e., reads that span introns. Often empty for non-spliced regions.  
+BAM Track (PC3_Normoxia_S1.bam) - Shows individual aligned reads. Each horizontal grey bar is a read aligned to that region.  
+
+<img width="1366" height="707" alt="image" src="https://github.com/user-attachments/assets/a9ad1ec6-63a2-4e0f-b12d-935212f10b77" />  
+
+**Read Info Pop-up**  
+When you click a read, IGV shows detailed info:  
+Read name: SRR7179536.8906826.1 – Unique identifier from sequencing.  
+Read length: 58 bp – The read spans 58 bases.  
+Flags: 256 – Indicates the read is a secondary alignment.  
+Mapping: Secondary @ MAPQ 1 – MAPQ (mapping quality) is low (1), secondary alignment.  
+CIGAR: 58M – The read aligns perfectly for 58 bases.  
+Location: chr1:124,439,623 – Position of the read on the reference.  
+Base and Quality: C @ QV 38 – The base at this position is C with a high quality score (38).  
+Other fields (NH, NM, etc.) provide technical details about alignment, mismatches, or splicing.  
+
+
 **6. QUALITY CHECK OF BAM FILES**  
 After aligning RNA-Seq reads to the GRCh38 reference genome and generating sorted BAM files, I performed quality assessment using Qualimap. This tool evaluates mapping quality, coverage uniformity, strand specificity, duplication rates, and GC bias across the dataset. Running Qualimap ensures that the BAM files are of high quality before downstream analysis, such as gene quantification and differential expression. For RNA-Seq, the BAM files were analyzed against the Ensembl GTF annotation to generate comprehensive reports, including alignment statistics and coverage plots, facilitating early detection of potential issues in the sequencing or alignment process.
+**If qualimap is run immediately after installing it using conda it be can run using the following command immediately or first create conda base and then only it could be run**
+```bash
+#to run qualimap using .sh script
+nano qualimapQC.sh
+```
+```bash
+#to run qualimap using .sh script
+chmod +x qualimapQC.sh
+./qualimapQC.sh
+```
+If this doesn't work, conda environment doesn't work,
+```bash
+source ~/miniconda3/etc/profile.d/conda.sh
+```
+```bash
+conda activate base
+```
+```bash
+bash qualimapQC.sh
+```
+
+
+
+
+
+
+
+
+
+
+
+
+<img width="940" height="259" alt="image" src="https://github.com/user-attachments/assets/f0b6d1d4-547e-4bab-9d2c-382bd05599c9" />  
+
+<img width="940" height="314" alt="image" src="https://github.com/user-attachments/assets/22fea255-48e8-46d3-a9a9-30fa6d976655" />  
+
+
+
+
 
 
 
