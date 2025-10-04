@@ -524,7 +524,7 @@ sudo systemctl status rstudio-server
 
 
 
-[Display Text](Bulk_RNAseq_Analysis/Data)
+[Download fastqc.sh](/Data)
 
 
 
