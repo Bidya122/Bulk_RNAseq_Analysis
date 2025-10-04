@@ -472,6 +472,39 @@ nano featurecounts.sh
 chmod +x featurecounts.sh
 ./featurecounts.sh
 ```
+<img width="940" height="611" alt="image" src="https://github.com/user-attachments/assets/b557857c-d55f-48e6-8e49-0ce962c56c4b" />  
+<img width="940" height="94" alt="image" src="https://github.com/user-attachments/assets/6627cfc1-1a85-4231-af47-2257d34fef91" />  
+
+**7. GENE-LEVEL COUNT MATRIX GENERATION (Python & R)** 
+
+For the downstream analysis, and generating a count matrix I cumulated the featurecounts data for a count matrix and I tried my hands on both Python and R. The script ( Rscript_for_merging_featurecounts.R & countsmatrix_wholedata.py) for both is on Data folder in this repository. 
+
+*Python Implementation:*  
+- Used pandas to read each FeatureCounts output file, extracted gene IDs and counts, and iteratively merged all   samples into a single CSV.  
+- Automated logging of processing time and number of genes per sample for efficiency tracking.
+
+*R Implementation:*
+- Used dplyr to read and process each FeatureCounts file, keeping only the gene ID and counts.
+- Merged all samples using full_join to produce a complete counts matrix, ready for DESeq2 or edgeR.
+
+**Note: The quants folder containing the FeatureCounts output files was transferred from the VM to my local machine to reduce cloud computing costs. Since the heavy-duty alignment and counting steps were already completed, all downstream analysis, including merging counts and differential expression, was performed locally in R.**  
+
+```bash
+#to install python and run the script 
+python3 --version
+pip3 install pandas
+sudo apt update
+sudo apt install python3-pip -y
+python3 countsmatrix_wholedata.py
+```
+<img width="1346" height="467" alt="image" src="https://github.com/user-attachments/assets/76fd9be0-5d67-407a-a037-cd08f4011b62" />  
+
+
+
+
+
+
+
 
 
 
