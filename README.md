@@ -516,12 +516,15 @@ sudo systemctl status rstudio-server
 ```
 <img width="940" height="238" alt="image" src="https://github.com/user-attachments/assets/2a78ee95-d92a-4551-8735-2acce8fcec84" />
 
-**Then go to browser and type URL - http://your_external_IP:8787 > then type in ur ID and password**  
+**Then , Browser and type URL - http://your_external_IP:8787 > then type in ur ID and password and rn the script**  
+
+**-------- Downstream Processing for Differential Gene Expression Analysis Begins now on R -----------**
 
 
 
 
 
+[Display Text](Bulk_RNAseq_Analysis/Data)
 
 
 
