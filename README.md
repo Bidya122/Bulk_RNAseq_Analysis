@@ -420,6 +420,7 @@ Other fields (NH, NM, etc.) provide technical details about alignment, mismatche
 
 
 **6. QUALITY CHECK OF BAM FILES**  
+
 After aligning RNA-Seq reads to the GRCh38 reference genome and generating sorted BAM files, I performed quality assessment using Qualimap. This tool evaluates mapping quality, coverage uniformity, strand specificity, duplication rates, and GC bias across the dataset. Running Qualimap ensures that the BAM files are of high quality before downstream analysis, such as gene quantification and differential expression. For RNA-Seq, the BAM files were analyzed against the Ensembl GTF annotation to generate comprehensive reports, including alignment statistics and coverage plots, facilitating early detection of potential issues in the sequencing or alignment process.
 **If qualimap is run immediately after installing it using conda it be can run using the following command immediately or first create conda base and then only it could be run**
 ```bash
@@ -442,21 +443,35 @@ conda activate base
 bash qualimapQC.sh
 ```
 
-
-
-
-
-
-
-
-
-
-
-
 <img width="940" height="259" alt="image" src="https://github.com/user-attachments/assets/f0b6d1d4-547e-4bab-9d2c-382bd05599c9" />  
 
 <img width="940" height="314" alt="image" src="https://github.com/user-attachments/assets/22fea255-48e8-46d3-a9a9-30fa6d976655" />  
 
+For each sample, the pipeline:
+- Extracts the sample name from the alignment file.  
+- Runs Qualimap RNA-Seq to evaluate mapping quality, gene coverage, and transcript-level metrics using the human GTF     annotation (GRCh38.115).  
+- Stores detailed QC reports in a dedicated output folder per sample.  
+- Memory optimization ensured efficient processing with 12 GB allocated to Java (required by Qualimap).
+
+**7. GENE EXPRESSION QUANTIFICATION USING FEATURECOUNTS**  
+
+- Performed gene-level read quantification from RNA-Seq alignments (BAM files) using FeatureCounts.  
+- Assigned sequencing reads to genes based on exon overlap using the reference GTF annotation (GRCh38.115).  
+- Generated a read count matrix across all samples, forming the input for downstream differential expression analysis. 
+- Ensured accurate handling of paired-end and stranded RNA-Seq libraries, producing a reliable dataset for expression profiling.
+```bash
+mkdir -p quants
+```
+Upload the .sh file on GCP and change the path and file name according to you.  
+
+```bash
+nano featurecounts.sh 
+```
+```bash
+#to run featurecounts using .sh script
+chmod +x featurecounts.sh
+./featurecounts.sh
+```
 
 
 
