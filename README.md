@@ -1,6 +1,18 @@
 # Bulk_RNAseq_Analysis
 
-
+## Table of Contents
+1. [Dataset Overview](#Introduction)
+2. [Google Cloud Setup](#Setting up Google Cloud Console)
+3. [Installation of Tools](#installation-of-tools)
+4. [Data Downloading](#data-downloading)
+5. [Quality Control](#quality-control)
+6. [Trimming](#trimming)
+7. [Alignment & Indexing](#alignment--indexing)
+8. [BAM File QC](#bam-file-qc)
+9. [Gene Quantification](#gene-quantification)
+10. [Count Matrix Generation](#count-matrix-generation)
+11. [Downstream Analysis](#downstream-analysis)
+    
 # Introduction  
 This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis. All steps were implemented hands-on, including cloud-based setup, raw data processing, alignment, QC, and downstream analysis, demonstrating practical proficiency in RNA-Seq workflows.
 
