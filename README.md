@@ -251,7 +251,7 @@ Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few p
 - The path and the file names could be different, also the tools if you choose to work with anything different.  
 - Let's START!!
    
-**1. DATASET_DOWNLOADING**
+**1. Dataset_Downloading**
 
 I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
 
