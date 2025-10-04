@@ -2,7 +2,7 @@
 
 ## Table of Contents
 1. [Dataset Overview](#Introduction)
-2. [Google Cloud Setup](#Setting up Google Cloud Console)
+2. [Google Cloud Setup](#Setting_up_google_cloud_console)
 3. [Installation of Tools](#installation-of-tools)
 4. [Data Downloading](#data-downloading)
 5. [Quality Control](#quality-control)
