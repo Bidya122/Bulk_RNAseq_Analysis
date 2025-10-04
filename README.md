@@ -338,6 +338,7 @@ fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
 <img width="940" height="173" alt="image" src="https://github.com/user-attachments/assets/78a2d0f1-b35e-4ab0-8bc1-d01a890a0f64" />  
 
 **Please find the trimmedqc.sh file to perform QC with fastqc on the trimmed fastq files on this repository in the Data folder**  
+[trimmedqc.sh](/Data)  
 
 Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
 
@@ -382,6 +383,8 @@ ls -lh Homo_sapiens.GRCh38.115.gtf
 
 hisat2alignment.sh file was uploaded on GCP  
 **Please find the hisat2alignment.sh file to perform alignment on the processed fastq files on this repository in the Data folder**  
+[hisat2alignment.sh](/Data)  
+
 ```bash
 #change the paths and folder names or any specifics  
 nano hisat2alignment.sh
@@ -425,6 +428,9 @@ Other fields (NH, NM, etc.) provide technical details about alignment, mismatche
 
 After aligning RNA-Seq reads to the GRCh38 reference genome and generating sorted BAM files, I performed quality assessment using Qualimap. This tool evaluates mapping quality, coverage uniformity, strand specificity, duplication rates, and GC bias across the dataset. Running Qualimap ensures that the BAM files are of high quality before downstream analysis, such as gene quantification and differential expression. For RNA-Seq, the BAM files were analyzed against the Ensembl GTF annotation to generate comprehensive reports, including alignment statistics and coverage plots, facilitating early detection of potential issues in the sequencing or alignment process.
 **If qualimap is run immediately after installing it using conda it be can run using the following command immediately or first create conda base and then only it could be run**
+**Please find the script in the data folder**
+[qualimapQC.sh](/Data)  
+
 ```bash
 #to run qualimap using .sh script
 nano qualimapQC.sh
@@ -464,7 +470,8 @@ For each sample, the pipeline:
 ```bash
 mkdir -p quants
 ```
-Upload the .sh file on GCP and change the path and file name according to you.  
+**Upload the .sh file on GCP and change the path and file name accordingly.**
+[featurecounts.sh](/Data)  
 
 ```bash
 nano featurecounts.sh 
@@ -490,6 +497,7 @@ For the downstream analysis, and generating a count matrix I cumulated the featu
 - Merged all samples using full_join to produce a complete counts matrix, ready for DESeq2 or edgeR.
 
 **Note: The quants folder containing the FeatureCounts output files was transferred from the VM to my local machine to reduce cloud computing costs. Since the heavy-duty alignment and counting steps were already completed, all downstream analysis, including merging counts and differential expression, was performed locally in R.**  
+[countsmatrix_wholedata.py](/Data)  
 
 ```bash
 #to install python and run the script 
@@ -502,6 +510,8 @@ python3 countsmatrix_wholedata.py
 <img width="1346" height="467" alt="image" src="https://github.com/user-attachments/assets/76fd9be0-5d67-407a-a037-cd08f4011b62" />  
 
 To run R, I used the Google cloud console only for the generation of read count matrix using the R script Rscript_for_merging_featurecounts.R  
+
+[Rscript_for_merging_featurecounts.R](/Data)  
 
 (ON bash)
 ```bash
@@ -526,7 +536,7 @@ sudo systemctl status rstudio-server
 
 
 
-[Download fastqc.sh](/Data)
+
 
 
 
