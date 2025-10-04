@@ -250,7 +250,9 @@ mkdir -p ~/bulk_RNA_analysis
 #if you are working on a VM (GCP), upload the .py file first using the upload option on top right and move it into this dir  
 mv ~/fastq_download.py ~/bulk_RNA_analysis/
 ```
-**Please find the fastq_download.py file on this repository in the Data folder**
+**Please find the fastq_download.py file on this repository in the Data folder**  
+[fastq_download.py](/Data)
+
 ```bash
 #to run the .py file
 python3 fastq_download.py
