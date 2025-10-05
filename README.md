@@ -608,7 +608,7 @@ head(my_colData)
 ```
 <img width="403" height="166" alt="image" src="https://github.com/user-attachments/assets/ec27a164-296d-42fc-ae7d-f592caf6b5c0" />
 
-To perform differential expression analysis using DESeq2, I first created a DESeqDataSet object using raw count data and sample metadata. This object serves as the foundation for downstream analysis.
+- To perform differential expression analysis using DESeq2, I first created a DESeqDataSet object using raw count data and sample metadata. This object serves as the foundation for downstream analysis.
 ```bash
 #create DESeq2 dataset
 dds <- DESeqDataSetFromMatrix(countData = raw_counts,
@@ -620,7 +620,7 @@ dim(counts(dds))
 ```
 <img width="1494" height="573" alt="image" src="https://github.com/user-attachments/assets/3f91073d-5734-4830-9d00-ea6f43df2905" /> 
 
-Before proceeding with normalization and differential expression testing, I examined how many genes have zero counts in each sample. This step helps identify lowly or non-expressed genes that may be removed to reduce noise. 
+- Before proceeding with normalization and differential expression testing, I examined how many genes have zero counts in each sample. This step helps identify lowly or non-expressed genes that may be removed to reduce noise. 
 
 ```bash
 #Quality check
@@ -633,7 +633,7 @@ print(zero_summary)
 ```
 <img width="994" height="223" alt="image" src="https://github.com/user-attachments/assets/ac4109cb-c688-41f9-9cdd-4185014861fb" />  
 
-To enhance interpretability of the raw RNA-seq counts, I merged Ensembl gene IDs with metadata from a GRCh38 annotation file. I removed version numbers from Ensembl IDs to ensure accurate matching, then used a left join to attach gene symbols and biotypes to each row in the count matrix. This allowed me to generate a streamlined, annotated dataset suitable for downstream analysis and visualization.
+- To enhance interpretability of the raw RNA-seq counts, I merged Ensembl gene IDs with metadata from a GRCh38 annotation file. I removed version numbers from Ensembl IDs to ensure accurate matching, then used a left join to attach gene symbols and biotypes to each row in the count matrix. This allowed me to generate a streamlined, annotated dataset suitable for downstream analysis and visualization.
 
 ```bash
 #Gene annotation join and Cleanup
@@ -652,7 +652,7 @@ annotated_counts <- left_join(counts_gse, annotation, by = "Geneid") %>%  ##perf
 ```
 <img width="1648" height="561" alt="image" src="https://github.com/user-attachments/assets/0419c09d-7210-4faf-9586-190c53ca8fe1" />  
 
-To improve the quality and interpretability of downstream analyses, I applied a two-step filtering approach on the annotated count matrix:  
+- To improve the quality and interpretability of downstream analyses, I applied a two-step filtering approach on the annotated count matrix:  
 Biotype filtering:  
 I retained genes belonging to biologically relevant categories including protein-coding genes and immune-related gene types (immunoglobulin and T-cell receptor genes). This reduces noise from uninformative or poorly annotated gene biotypes.
 Expression filtering:  
@@ -691,10 +691,205 @@ dds_filtered <- dds[rownames(dds) %in% filtered_counts_nozero$gene_id, ]  ##Keep
 
 cat("Dimensions of filtered DESeqDataSet:", dim(dds_filtered), "\n")
 
-removed_genes <- filtered_counts[!keep_genes, ]  ##Gets the genes that were filtered out because they had zeros in all samples. So we know we are not losing anything important in the filteration step
+removed_genes <- filtered_counts[!keep_genes, ]  ## Get genes filtered out due to zeros in all samples
 cat("Biotype distribution of removed genes:\n")
-print(table(removed_genes$gene_biotype))
+removed_biotype_dist <- table(removed_genes$Genebiotype)
+print(removed_biotype_dist)
 ```
+<img width="801" height="171" alt="image" src="https://github.com/user-attachments/assets/bfc70355-d8df-40c5-b05e-85b5df885ffe" />  
+Summarizes the frequency of genes having 0, 1, 2, ... zeros across the samples.  
+
+<img width="1124" height="116" alt="image" src="https://github.com/user-attachments/assets/11b6f28a-d1de-4fc0-8b7b-d3aeb7394420" />  
+After removing genes that are zero (not expressed) in 7 or more samples, 17,478 genes remain.
+
+<img width="1239" height="189" alt="image" src="https://github.com/user-attachments/assets/f94bd9bf-8556-45a4-9e61-dd588a5a2e79" />  
+These are the biotypes of removed genes
+
+- I filtered the gene count data by removing genes with zero counts in 7 or more samples to improve data quality. The filtered dataset was saved, and the DESeq2 object was updated accordingly to ensure consistency for downstream analysis. This step helps focus on reliably expressed genes and reduces noise. The first filter (e.g., by biotype) narrows down genes to relevant types, but it doesn't guarantee all those genes are sufficiently expressed. The second filter targets expression levels, removing genes with too many zeros, improving data quality further.
+```bash
+print(colnames(filtered_counts)) ##outputs the column names of filtered_counts data frame.
+zero_counts <- rowSums(filtered_counts[, 4:11] == 0) ##For each gene(each row), counts how many samples(columns 4 to 11) have a zero count.
+zero_summary <- table(zero_counts)
+print(zero_summary)
+keep_genes <- zero_counts < 7
+filtered_counts_nozero <- filtered_counts[keep_genes, ]  ##Keeps genes expressed(non-zero) in at least 2 samples(since fewer than 7 zeros).
+cat("Number of genes after filtering (zeros in <7 samples):", nrow(filtered_counts_nozero), "\n")
+
+new_zero_counts <- rowSums(filtered_counts_nozero[, 4:11] == 0  ##Counts zeros again in the filtered dataset to check the new distribution
+print(table(new_zero_counts))
+
+output_file <- "filtered_biotype_6.csv"  ##filtered count matrix to a CSV file
+fwrite(filtered_counts_nozero, file = output_file, sep = ",", row.names = FALSE)
+
+head(filtered_counts_nozero, n = 3) 
+
+dds_filtered <- dds[rownames(dds) %in% filtered_counts_nozero$Geneid, ]  ##Filters the original DESeq2 dataset (dds) to keep only genes that passed the zero-count filtering.
+```
+
+<img width="1527" height="234" alt="image" src="https://github.com/user-attachments/assets/a0e78145-979d-4b78-bc7e-393461615d1e" />  
+This shows the filtered read counts where all genes are expressed and contains no zeroes. 
+
+- I analyzed the distribution of gene biotypes in the filtered dataset by calculating the proportion of genes belonging to each biotype category. Using ggplot2, I created a clear and informative bar plot visualizing these proportions, which highlights the dominant gene types retained after filtering. The plot was saved as a high-resolution image for documentation and presentation purposes.
+```bash
+biotype_counts <- filtered_counts_nozero %>%  ##Using the zero-count-cleaned dataset (filtered_counts_nozero), it counts how many genes belong to each gene biotype (Genebiotype). Then it calculates the proportion and percentage of each biotype relative to the total genes.
+  count(Genebiotype) %>%
+  mutate(Proportion = n / sum(n),
+         Percentage = Proportion * 100) %>%
+  rename(Biotype = Genebiotype)  # Rename for clarity in plot
+print(biotype_counts)
+
+p <- ggplot(biotype_counts, aes(x = reorder(Biotype, -Proportion), y = Proportion, fill = Biotype)) +    ##create plot with ggplo2
+    geom_bar(stat = "identity") +
+    labs(title = "Proportion of Genes by Biotype",
+        x = "Gene Biotypes",
+          y = "Proportion") +
+     scale_y_continuous(labels = scales::percent_format(scale = 100)) +  # Show proportions as percentages
+    theme_minimal() +
+     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Legend is shown now
+    scale_fill_brewer(palette = "Set2")  # Use distinct colors 
+p
+output_plot <- "genebiotype_proportions1.png"
+ggsave(output_plot, plot = p, width = 8, height = 6, dpi = 300)
+```
+
+<img width="1351" height="693" alt="image" src="https://github.com/user-attachments/assets/c2d84e33-eacb-4471-90d8-1e233e7192bc" />  
+As shown in the plot, the most abundant gene biotype in the experiment is protein_coding, indicating that the majority of retained genes after filtering are protein-coding genes.
+
+-  I conducted Principal Component Analysis (PCA) on variance-stabilized gene expression data to examine sample relationships and variability. The PCA plot visualizes the first two principal components, with samples colored by experimental condition. Clear labels were added using ggrepel to avoid overlap. The plot was saved as a high-quality image for reporting and interpretation.
+```bash
+vsd <- vst(dds_filtered, blind = TRUE)  # blind=TRUE for exploratory PCA  ##transforms the filtered DESeq2 data for variance stabilization, which is good for PCA  
+plot_PCA = function (vsd.obj) {
+  pcaData <- plotPCA(vsd.obj,  intgroup = c("condition"), returnData = T)
+  percentVar <- round(100 * attr(pcaData, "percentVar"))
+  ggplot(pcaData, aes(PC1, PC2, color=condition)) +
+    geom_point(size=3) +
+    labs(x = paste0("PC1: ",percentVar[1],"% variance"),
+         y = paste0("PC2: ",percentVar[2],"% variance"),
+         title = "PCA Plot colored by condition") +
+    ggrepel::geom_text_repel(aes(label = name), color = "black")
+}
+
+png(filename = "pcab.png", 
+    width = 2000, height = 2000, res = 300)  # adjust width/height as needed
+plot_PCA(vsd)
+dev.off()
+using ntop=500 top features by variance  ##selecting the 500 genes (features) with the highest variability across samples
+```
+<img width="612" height="607" alt="image" src="https://github.com/user-attachments/assets/6c25f946-c855-40bc-917c-4a98d1da89f4" /> 
+The PCA plot reveals distinct clustering of samples according to their experimental conditions, indicating that the treatment strongly influences gene expression profiles. For example, samples under hypoxia cluster separately from normoxia, reflecting biological differences captured by the data. The close grouping of replicates confirms good experimental consistency. No obvious outliers were observed, suggesting reliable data quality.It explains nearly 99% of the variance, clearly separates samples based on the hypoxia condition. This strong separation indicates that hypoxia has a major impact on gene expression, driving most of the variability in the dataset.
+
+- I performed differential expression analysis on the filtered dataset using the DESeq2 pipeline. After fitting the model with DESeq(), I extracted the normalized count data to correct for library size and sequencing depth differences. The normalized counts were saved as a CSV file for downstream analyses and reporting.
+```bash
+dds <- DESeq(dds_filtered)  ##fits the negative binomial model to the count data using the DESeq() function, which estimates size factors and dispersions necessary for normalization and statistical testing
+dds
+normalized_counts <- counts(dds, normalized = T)  ##extracted the normalized counts
+normalized_counts_df <- as.data.frame(normalized_counts)
+write.csv(normalized_counts_df, file = "normalized_counts.csv", row.names = TRUE)
+```
+<img width="1382" height="356" alt="image" src="https://github.com/user-attachments/assets/26b8def1-abd9-4797-ad6d-22f5a32fe528" /> 
+This only carried the gene ids, if needed can be joined with gene annotation file like earlier
+
+- I generated a sample-to-sample distance heatmap using variance-stabilized data to assess the similarity between samples. The heatmap shows hierarchical clustering of samples based on Euclidean distances, confirming expected grouping by experimental condition (e.g., hypoxia vs. normoxia).
+```bash
+vsd <- vst(dds, blind = TRUE) ##Applies variance-stabilizing transformation
+plotDists = function (vsd.obj) {
+  sampleDists <- dist(t(assay(vsd.obj))) ##Computes Euclidean distances between samples using the transformed data (columns = samples)
+  sampleDistMatrix <- as.matrix(sampleDists)
+  rownames(sampleDistMatrix) <- paste(vsd.obj$condition)
+  colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Blues")))(55)
+  pheatmap::pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists,  clustering_distance_cols = sampleDists, col = colors, fontsize_row = 4, fontsize_col = 4, fontsize_legend = 4, fontsize = 4)
+}
+png(filename = "sampleheatmap1.png", width = 1000, height = 900, res = 300)  # adjust width/height as needed
+plotDists(vsd)
+dev.off()
+```
+<img width="676" height="609" alt="image" src="https://github.com/user-attachments/assets/51a5333a-8ee7-4cda-8357-9b6932c1f25b" />  
+A sample-to-sample distance heatmap was generated using variance-stabilized transformed (VST) expression data. The Euclidean distances between samples reveal strong clustering by cell line (LNCaP vs. PC3) and condition (Hypoxia vs. Normoxia). Replicates within each group (e.g., LNCAP_Hypoxia_S1 and S2) show high similarity (darker blue), confirming consistency. Additionally, the dendrogram clearly separates LNCaP and PC3 groups, validating distinct transcriptional profiles across cell lines.
+
+```bash
+variable_gene_heatmap <- function (vsd.obj, num_genes = 40, annotation, title = "") {
+  library(pheatmap)
+  library(RColorBrewer)
+  library(matrixStats)
+
+  # Color palette
+  brewer_palette <- "RdBu"
+  ramp <- colorRampPalette(RColorBrewer::brewer.pal(11, brewer_palette))
+  mr <- ramp(256)[256:1]
+
+  # Get top variable genes
+  stabilized_counts <- assay(vsd.obj)
+  row_variances <- rowVars(stabilized_counts)
+  top_variable_genes <- stabilized_counts[order(row_variances, decreasing=TRUE)[1:num_genes],]
+  top_variable_genes <- top_variable_genes - rowMeans(top_variable_genes, na.rm=TRUE)
+
+  # Map gene names
+  gene_names <- annotation$Genesymbol[match(rownames(top_variable_genes), annotation$Geneid)]
+  gene_names[is.na(gene_names)] <- rownames(top_variable_genes)[is.na(gene_names)]
+  rownames(top_variable_genes) <- gene_names
+
+  # Get metadata
+  coldata <- as.data.frame(vsd.obj@colData)
+  coldata$sizeFactor <- NULL
+
+  # Plot
+  pheatmap::pheatmap(
+    top_variable_genes,
+    color = mr,
+    annotation_col = coldata,
+    fontsize_col = 8,
+    fontsize_row = max(6, 250 / num_genes),
+    border_color = NA,
+    main = title
+  )
+}
+png(filename = "variable_gene_heatmap.png", width = 1400, height = 2000, res = 300)
+variable_gene_heatmap(vsd, num_genes = 40, annotation = annotation)
+dev.off()
+```
+<img width="425" height="609" alt="image" src="https://github.com/user-attachments/assets/542aa7a1-764b-4d99-8317-c6b17d7de0aa" />  
+The heatmap displays the expression patterns of the top variable genes across different samples or conditions. Each row corresponds to a highly variable gene, and each column represents a sample. The color intensity reflects the normalized expression level of each gene in each sample, with the color scale indicating relative expression (e.g., blue for low expression, red for high expression). Clustering of rows (genes) and columns (samples) reveals groups of genes with similar expression profiles and samples with similar gene expression patterns, respectively. This visualization helps identify distinct gene expression signatures associated with specific conditions or sample groups, highlighting potentially important genes for further biological interpretation.
+
+- The MA-plot visualizes differential expression results by plotting the log2 fold change (M) of each gene against its average normalized expression (A). It helps to identify genes that are significantly up- or down-regulated between the hypoxia and normoxia conditions in the LNCAP samples. Genes with significant adjusted p-values are highlighted to show the most relevant changes.
+```bash
+dds_lncap <- dds[, grepl("LNCAP", colnames(dds))]   ##subset the DESeqDataSet (dds) to keep only samples with "LNCAP" in their column names
+dds_lncap
+dds_lncap$condition <- droplevels(dds_lncap$condition)  ##Removes unused factor levels in the condition variable, so only relevant ones remain.
+dds_lncap$condition <- relevel(dds_lncap$condition, ref = "LNCAP_Normoxia")   ##Sets the reference level for the condition factor to "LNCAP_Normoxia" which means means comparisons will be made relative to this baseline.
+dds_lncap <- DESeq(dds_lncap)
+
+res_lncap <- results(dds_lncap, contrast = c("condition", "LNCAP_Hypoxia", "LNCAP_Normoxia"))  ##Extracts the results comparing LNCAP_Hypoxia vs LNCAP_Normoxia conditions.
+res_lncap
+summary(res_lncap)
+# res0.01 <- results(dds, alpha = 0.5)
+# summary(res0.01)
+sum(reslncapOrdered$padj < 0.05, na.rm = TRUE)
+reslncapOrdered <- res_lncap[order(res_lncap$padj), ]
+head(reslncapOrdered)
+summary(reslncapOrdered)
+write.csv(as.data.frame(reslncapOrdered), file = "DEGs_lncap.csv")
+plotMA(res_lncap)
+```
+<img width="1017" height="661" alt="image" src="https://github.com/user-attachments/assets/27c212ca-3d50-46cd-b14b-abbe23809017" />
+The MA-plot visualizes the relationship between the mean expression (average counts) and the log2 fold changes of genes when comparing LNCAP cells under hypoxia versus normoxia conditions. The x-axis (A) represents the average normalized expression level of each gene across all samples. The y-axis (M) shows the log2 fold change in expression between hypoxia and normoxia conditions. Each point corresponds to a gene. Genes with significant differential expression (adjusted p-value < 0.05) are typically highlighted in blue, indicating upregulated or downregulated genes under hypoxia.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  
 
