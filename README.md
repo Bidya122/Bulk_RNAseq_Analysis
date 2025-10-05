@@ -249,16 +249,16 @@ conda config --set auto_activate_base false
 sudo apt install subread
 ```
 ## Workflow Starts:
-Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few points to remember:  
-- Please be careful about the directories you will be making. Be careful about where you are saving your results.  
-- In any script, the most important thing to keep in mind is the path of the file that the script is fetching and the output directory of the output files.  
-- Also be mindful of the files you will be downloading, before downloading double check the working dir.  
+Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few points to remember according to my understanding:   
+- To be careful about the directories you will be making. Be careful about where you are saving your results.  
+- In any script, the most important thing to keep in mind is the path of the file that the script is fetching and the output directory of the output files, so yes, the path matters.  
+-  Being mindful of the files you will be downloading, before downloading double check the working dir.  
 - The path and the file names could be different, also the tools if you choose to work with anything different.  
 - Let's START!!
    
 # **1. DATASET_DOWNLOADING**
 
-I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
+I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data. This dataset was publicly available!! 
 
 For that I have used fastq_download.py FASTQ is the raw sequencing reads from a sequencing machine (like Illumina). Each read is basically the DNA or RNA fragment that was sequenced. FASTQ files contain both the sequence and the quality scores for each base. In the downstream I have attached an example of the how the file looks.  
 *Command/Script Explanation: Download raw SRA files from NCBI > Convert them to FASTQ files ready for RNA-Seq analysis > Compress and organize the reads automatically > Reports the time taken for each step.*
