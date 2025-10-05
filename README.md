@@ -566,18 +566,36 @@ sudo systemctl status rstudio-server
 # **9. DOWNSTREAM_ANALYSIS**
 
 ```bash
-#to run featurecounts using .sh script
+#to load the counts matrix file
 raw_counts <- read.csv("GSE106305_counts_matrix.csv", header = TRUE, row.names = "Geneid", stringsAsFactors = FALSE)  
 head(raw_counts)
 ```
-
 <img width="972" height="286" alt="image" src="https://github.com/user-attachments/assets/8aa101a4-bc3b-4747-861c-af773974715a" />
 
 
+```bash
+#to give a sum total of all the read counts in each sample
+raw_counts <- raw_counts[,sort(colnames(raw_counts))]
+colSums(raw_counts)
+```
+<img width="1050" height="118" alt="image" src="https://github.com/user-attachments/assets/f0f06ac2-aea6-43e6-90e0-3d66be0f8a84" />
 
 
+```bash
+#to define experimental conditions for RNA-seq analysis
+condition <- c(rep("LNCAP_Hypoxia", 2), rep("LNCAP_Normoxia", 2), rep("PC3_Hypoxia", 2), rep("PC3_Normoxia", 2))
+print(condition)
+```
+<img width="1011" height="96" alt="image" src="https://github.com/user-attachments/assets/6f742808-62b5-4501-9719-bca1210b93a2" />
 
 
+```bash
+#to define Rows are named after your samples and Column named after condition to later work with DeSeq2
+my_colData <- as.data.frame(condition)
+rownames(my_colData) <- colnames(raw_counts)
+head(my_colData)
+```
+<img width="403" height="166" alt="image" src="https://github.com/user-attachments/assets/ec27a164-296d-42fc-ae7d-f592caf6b5c0" />
 
 
 
