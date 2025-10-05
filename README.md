@@ -848,6 +848,7 @@ variable_gene_heatmap(vsd, num_genes = 40, annotation = annotation)
 dev.off()
 ```
 <img width="425" height="609" alt="image" src="https://github.com/user-attachments/assets/542aa7a1-764b-4d99-8317-c6b17d7de0aa" />  
+
 The heatmap displays the expression patterns of the top variable genes across different samples or conditions. Each row corresponds to a highly variable gene, and each column represents a sample. The color intensity reflects the normalized expression level of each gene in each sample, with the color scale indicating relative expression (e.g., blue for low expression, red for high expression). Clustering of rows (genes) and columns (samples) reveals groups of genes with similar expression profiles and samples with similar gene expression patterns, respectively. This visualization helps identify distinct gene expression signatures associated with specific conditions or sample groups, highlighting potentially important genes for further biological interpretation.
 
 - The MA-plot visualizes differential expression results by plotting the log2 fold change (M) of each gene against its average normalized expression (A). It helps to identify genes that are significantly up- or down-regulated between the hypoxia and normoxia conditions in the LNCAP samples. Genes with significant adjusted p-values are highlighted to show the most relevant changes.
