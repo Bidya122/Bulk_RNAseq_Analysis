@@ -491,7 +491,7 @@ For each sample, the pipeline:
 
   [Results of QC](/Output/Qualimap_Reports)
 
-   
+  Alignment summaries confirmed that all samples mapped efficiently to the genome, and reads genomic origin analysis showed that 89–90% of reads mapped to exonic regions, ~9% to introns, and <2% to intergenic regions. No reads were detected in rRNA regions, indicating clean library preparation. Samples with low exon coverage (<70%) would typically be flagged for reanalysis, such as checking alignment parameters, trimming, or re-examining library preparation. In this dataset, all samples passed the expected coverage thresholds, so no reanalysis was required. 
 
 # **7. GENE_EXPRESSION_QUANTIFICATION_USING_FEATURECOUNTS**  
 
