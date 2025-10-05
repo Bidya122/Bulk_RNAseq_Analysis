@@ -1,5 +1,26 @@
 # Bulk_RNAseq_Analysis
-This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis.
+This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis. All steps were implemented hands-on, including cloud-based setup, raw data processing, alignment, QC, and downstream analysis, demonstrating practical proficiency in RNA-Seq workflows.
+
+# Table of Contents
+1. [Dataset Overview](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#introduction) 
+2. [Google Cloud Setup](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#setting_up_google_cloud_console) 
+3. [Installation of Tools](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#setting_up_the_terminal_and_installation_of_tools ) 
+4. [Data Downloading](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#1-dataset_downloading) 
+5. [Organizing Data](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#2-organizing_dataset_concatenate__renaming) 
+6. [Quality Check](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#3-quality_check) 
+7. [Trimming](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#4-trimming_if_needed) 
+8. [Alignment & Indexing](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#5-indexing_and_alignment) 
+9. [BAM File QC](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#6-quality_check_of_bam_files) 
+10. [Gene Quantification](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#7-gene_expression_quantification_using_featurecounts) 
+11. [Count Matrix Generation](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#8-gene-level_count_matrix_generation_python__r) 
+12. [Downstream Analysis](https://github.com/Bidya122/Bulk_RNAseq_Analysis/blob/main/README.md#8-gene-level_count_matrix_generation_python__r)
+
+[Find Scripts](https://github.com/Bidya122/Bulk_RNAseq_Analysis/tree/main/Data)
+[Find Output files](https://github.com/Bidya122/Bulk_RNAseq_Analysis/tree/main/Output)   
+
+
+# Introduction  
+This repository contains scripts, workflows, and documentation for performing bulk RNA sequencing (RNA-seq) analysis. All steps were implemented hands-on, including cloud-based setup, raw data processing, alignment, QC, and downstream analysis, demonstrating practical proficiency in RNA-Seq workflows.
 
 **ONECUT2 Signaling Role in Normoxia and Hypoxia Condition for Neuroendocrine Prostate Cancer**  
 Experimental Design:  
@@ -49,7 +70,7 @@ Explore transcription factor interactions under hypoxia conditions
 
 Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 
-# Setting up Google Cloud Console
+# Setting_up_Google_Cloud_Console
 
 **Lets Start with the Workflow, Since my laptop has very low RAM and cannot support the analysis, I chose to perform the work on Google Cloud Platform (GCP). This not only solves the hardware limitation but also provides me with valuable experience in cloud computing.**
 *Set up Google Cloud Console*  
@@ -90,7 +111,7 @@ Link for Dataset: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106305
 -Just click **Create** and its done. Voila!! you have your VM. It will take a couple of minutes and the window will open. You can see your VM name and a green tick near it which means its running. Click on **SSH** button and your terminal will open.  
 
 
-## Setting up the terminal and Installation of Tools.  
+## Setting_up_the_terminal_and_Installation_of_Tools  
 I have written the installation steps first, rather than writing it during the workflow. You can do it one by one during each step of the analysis or however you wish. My intention was to have a clear workflow with clear steps.
 
 **Update and upgrade system packages**
@@ -235,7 +256,7 @@ Finally we have come to the actual workflow of this Bulk RNA Seq Analysis. Few p
 - The path and the file names could be different, also the tools if you choose to work with anything different.  
 - Let's START!!
    
-**1. DATASET DOWNLOADING**
+# **1. DATASET_DOWNLOADING**
 
 I have chosen to download the dataset using a script because of automation, reproducibility, and reliability instead of manually doing it from the database. It would also cause errors. It also helps in proper organization of the data into folders and helps in error handling and resuming the process after already present data.  
 
@@ -250,7 +271,9 @@ mkdir -p ~/bulk_RNA_analysis
 #if you are working on a VM (GCP), upload the .py file first using the upload option on top right and move it into this dir  
 mv ~/fastq_download.py ~/bulk_RNA_analysis/
 ```
-**Please find the fastq_download.py file on this repository in the Data folder**
+**Please find the fastq_download.py file on this repository in the Data folder**  
+[fastq_download.py](/Data)
+
 ```bash
 #to run the .py file
 python3 fastq_download.py
@@ -260,7 +283,7 @@ python3 fastq_download.py
 <img width="940" height="70" alt="image" src="https://github.com/user-attachments/assets/23cc73e5-6d96-4855-ab27-ee278f16cae0" />  
 
 
-**2. ORGANIZING DATASET (CONCATENATE & RENAMING)**  
+# **2. ORGANIZING_DATASET_(CONCATENATE_&_RENAMING)**  
 
 As I am working with publicly available dataset it was done as a preprocessing step before actually running the analysis on it. As we saw it from the data base SRR7179504, SRR7179505, SRR7179506, SRR7179507 are all pieces of the same biological sample (LNCAP_Normoxia_S1) so I just joined it together so the results are not messy later on. 
 *Command/Script Explanation: cat joins all files and puts into whatever is written after > . and mv moves the matter of one file to the other eg. matter from SRR7179536_pass.fastq.gz to PC3_Normoxia_S1.fastq.gz*
@@ -290,7 +313,7 @@ This is how the fastq file looks. It has four lines.. 1.Read Id starts with @ 2.
 <img width="940" height="85" alt="image" src="https://github.com/user-attachments/assets/f557eb5c-41e1-4267-bfec-7573d8442700" />
 
 
-**3. QUALITY CHECK**
+# **3. QUALITY_CHECK**
 We perform quality checks (QC) on FASTQ files because raw sequencing data is noisy and error-prone. If we don’t check quality early, errors can propagate into alignment, quantification, and differential expression results. Fastqc tells us about read quality across the entire length, Detect adapter contamination, Identify overrepresented sequences, Helps detect technical artifacts, rRNA contamination, or PCR duplicates, Check GC content distribution, Ensure enough sequencing depth & uniformity and helps to Catch issues before wasting compute. 
 *Command/Script Explanation: fastq is the tool which I used to do this*
 ```bash
@@ -311,11 +334,14 @@ multiqc fastqc_results/ -o multiqc_report/
 ```
 <img width="940" height="204" alt="image" src="https://github.com/user-attachments/assets/2b4fb960-a3f0-48fc-a65d-effd3f6b3c80" />  
 
+Quality assessment was performed using FastQC on one representative sample (LNCAP_Hypoxia_S1) to demonstrate the QC workflow. My objective was to get familiarize with the tool and interpret the major metrics (per-base sequence quality, GC content, and adapter contamination). The FastQC report indicated high-quality reads across all positions with no adapter contamination. Therefore, trimming was not required for this or other samples. This decision ensured data integrity was preserved and unnecessary processing was avoided.  
+The summary reports for all samples confirmed consistent sequencing quality, allowing the pipeline to proceed directly to alignment.  
 
-**Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder**  
+**Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder** 
+[Results of QC](/Output/Qualitycheck)  
 
 
-**4. TRIMMING IF NEEDED**
+# **4. TRIMMING_IF_NEEDED**
 In RNA-Seq pipelines, trimming is often applied to remove adapter contamination and low-quality bases at the read ends, which can otherwise reduce alignment accuracy. To gain familiarity with preprocessing tools, I performed trimming on one FASTQ file (LNCAP_Hypoxia_S1.fastq.gz) using Trimmomatic. The trimmed file was then re-evaluated with FastQC to confirm the improvement in quality metrics. 
 ```bash
 #runs trimmomatic on the specified sample
@@ -336,10 +362,14 @@ fastqc LNCAP_Hypoxia_S1_trimmed.fastq.gz
 <img width="940" height="173" alt="image" src="https://github.com/user-attachments/assets/78a2d0f1-b35e-4ab0-8bc1-d01a890a0f64" />  
 
 **Please find the trimmedqc.sh file to perform QC with fastqc on the trimmed fastq files on this repository in the Data folder**  
+[trimmedqc.sh](/Data)  
 
-Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.
+Since overall FastQC/MultiQC reports showed consistently high Phred scores and negligible adapter contamination, trimming was not applied to the remaining samples, in order to preserve read length and maximize mapping efficiency.  
 
-**5. INDEXING AND ALIGNMENT**  
+[Results of QC](/Output/Qualitycheck)  
+
+
+# **5. INDEXING_AND_ALIGNMENT**  
 
 As the raw reads are processed, its time to align it to a reference genome. Because the genome is very huge its converted to genome indexes using hisat2-build. Before aligning RNA-Seq reads, HISAT2 requires a genome index. Instead of building it from scratch (which is time-consuming), I used a prebuilt GRCh38 human genome index provided by the HISAT2 team.It will align the single-end RNA-Seq FASTQ files against the HISAT2 genome index, then sort and index the BAM outputs with samtools. HISAT2 was used because of Lower memory requirement, Works well on modest VMs and has pre built indices.
 
@@ -380,6 +410,8 @@ ls -lh Homo_sapiens.GRCh38.115.gtf
 
 hisat2alignment.sh file was uploaded on GCP  
 **Please find the hisat2alignment.sh file to perform alignment on the processed fastq files on this repository in the Data folder**  
+[hisat2alignment.sh](/Data)  
+
 ```bash
 #change the paths and folder names or any specifics  
 nano hisat2alignment.sh
@@ -389,6 +421,7 @@ nano hisat2alignment.sh
 chmod +x hisat2alignment.sh
 ./hisat2alignment.sh
 ```
+After running HISAT2, I evaluated the mapping efficiency for each sample using the alignment summary reports. All samples aligned efficiently to the reference genome, confirming the integrity and quality of the RNA-seq libraries. In a standard workflow, any sample with a mapping rate below 85–90% would be rechecked for adapter contamination or reference mismatch.  
 **FASTQ → (HISAT2) → SAM → (Samtools sort) → BAM → (Samtools index) → BAM + BAI**  
 
 <img width="940" height="148" alt="image" src="https://github.com/user-attachments/assets/a2530284-2fc2-4857-93a4-acccd54e50b5" />  
@@ -419,10 +452,13 @@ Base and Quality: C @ QV 38 – The base at this position is C with a high quali
 Other fields (NH, NM, etc.) provide technical details about alignment, mismatches, or splicing.  
 
 
-**6. QUALITY CHECK OF BAM FILES**  
+# **6. QUALITY_CHECK_OF_BAM_FILES**  
 
 After aligning RNA-Seq reads to the GRCh38 reference genome and generating sorted BAM files, I performed quality assessment using Qualimap. This tool evaluates mapping quality, coverage uniformity, strand specificity, duplication rates, and GC bias across the dataset. Running Qualimap ensures that the BAM files are of high quality before downstream analysis, such as gene quantification and differential expression. For RNA-Seq, the BAM files were analyzed against the Ensembl GTF annotation to generate comprehensive reports, including alignment statistics and coverage plots, facilitating early detection of potential issues in the sequencing or alignment process.
 **If qualimap is run immediately after installing it using conda it be can run using the following command immediately or first create conda base and then only it could be run**
+**Please find the script in the data folder**
+[qualimapQC.sh](/Data)  
+
 ```bash
 #to run qualimap using .sh script
 nano qualimapQC.sh
@@ -453,7 +489,11 @@ For each sample, the pipeline:
 - Stores detailed QC reports in a dedicated output folder per sample.  
 - Memory optimization ensured efficient processing with 12 GB allocated to Java (required by Qualimap).
 
-**7. GENE EXPRESSION QUANTIFICATION USING FEATURECOUNTS**  
+  [Results of QC](/Output/Qualimap_Reports)
+
+  Alignment summaries confirmed that all samples mapped efficiently to the genome, and reads genomic origin analysis showed that 89–90% of reads mapped to exonic regions, ~9% to introns, and <2% to intergenic regions. No reads were detected in rRNA regions, indicating clean library preparation. Samples with low exon coverage (<70%) would typically be flagged for reanalysis, such as checking alignment parameters, trimming, or re-examining library preparation. In this dataset, all samples passed the expected coverage thresholds, so no reanalysis was required. 
+
+# **7. GENE_EXPRESSION_QUANTIFICATION_USING_FEATURECOUNTS**  
 
 - Performed gene-level read quantification from RNA-Seq alignments (BAM files) using FeatureCounts.  
 - Assigned sequencing reads to genes based on exon overlap using the reference GTF annotation (GRCh38.115).  
@@ -462,7 +502,8 @@ For each sample, the pipeline:
 ```bash
 mkdir -p quants
 ```
-Upload the .sh file on GCP and change the path and file name according to you.  
+**Upload the .sh file on GCP and change the path and file name accordingly.**
+[featurecounts.sh](/Data)  
 
 ```bash
 nano featurecounts.sh 
@@ -475,7 +516,7 @@ chmod +x featurecounts.sh
 <img width="940" height="611" alt="image" src="https://github.com/user-attachments/assets/b557857c-d55f-48e6-8e49-0ce962c56c4b" />  
 <img width="940" height="94" alt="image" src="https://github.com/user-attachments/assets/6627cfc1-1a85-4231-af47-2257d34fef91" />  
 
-**7. GENE-LEVEL COUNT MATRIX GENERATION (Python & R)** 
+# **8. GENE-LEVEL_COUNT_MATRIX_GENERATION_(Python_&_R)** 
 
 For the downstream analysis, and generating a count matrix I cumulated the featurecounts data for a count matrix and I tried my hands on both Python and R. The script ( Rscript_for_merging_featurecounts.R & countsmatrix_wholedata.py) for both is on Data folder in this repository. 
 
@@ -488,6 +529,7 @@ For the downstream analysis, and generating a count matrix I cumulated the featu
 - Merged all samples using full_join to produce a complete counts matrix, ready for DESeq2 or edgeR.
 
 **Note: The quants folder containing the FeatureCounts output files was transferred from the VM to my local machine to reduce cloud computing costs. Since the heavy-duty alignment and counting steps were already completed, all downstream analysis, including merging counts and differential expression, was performed locally in R.**  
+[countsmatrix_wholedata.py](/Data)  
 
 ```bash
 #to install python and run the script 
@@ -500,6 +542,8 @@ python3 countsmatrix_wholedata.py
 <img width="1346" height="467" alt="image" src="https://github.com/user-attachments/assets/76fd9be0-5d67-407a-a037-cd08f4011b62" />  
 
 To run R, I used the Google cloud console only for the generation of read count matrix using the R script Rscript_for_merging_featurecounts.R  
+
+[Rscript_for_merging_featurecounts.R](/Data)  
 
 (ON bash)
 ```bash
@@ -516,12 +560,42 @@ sudo systemctl status rstudio-server
 ```
 <img width="940" height="238" alt="image" src="https://github.com/user-attachments/assets/2a78ee95-d92a-4551-8735-2acce8fcec84" />
 
-**Then go to browser and type URL - http://your_external_IP:8787 > then type in ur ID and password**  
+**Then , Browser and type URL - http://your_external_IP:8787 > then type in ur ID and password and rn the script**  
+
+**-------- Downstream Processing for Differential Gene Expression Analysis Begins now on R -----------**
+# **9. DOWNSTREAM_ANALYSIS**
+
+```bash
+#to load the counts matrix file
+raw_counts <- read.csv("GSE106305_counts_matrix.csv", header = TRUE, row.names = "Geneid", stringsAsFactors = FALSE)  
+head(raw_counts)
+```
+<img width="972" height="286" alt="image" src="https://github.com/user-attachments/assets/8aa101a4-bc3b-4747-861c-af773974715a" />
 
 
+```bash
+#to give a sum total of all the read counts in each sample
+raw_counts <- raw_counts[,sort(colnames(raw_counts))]
+colSums(raw_counts)
+```
+<img width="1050" height="118" alt="image" src="https://github.com/user-attachments/assets/f0f06ac2-aea6-43e6-90e0-3d66be0f8a84" />
 
 
+```bash
+#to define experimental conditions for RNA-seq analysis
+condition <- c(rep("LNCAP_Hypoxia", 2), rep("LNCAP_Normoxia", 2), rep("PC3_Hypoxia", 2), rep("PC3_Normoxia", 2))
+print(condition)
+```
+<img width="1011" height="96" alt="image" src="https://github.com/user-attachments/assets/6f742808-62b5-4501-9719-bca1210b93a2" />
 
+
+```bash
+#to define Rows are named after your samples and Column named after condition to later work with DeSeq2
+my_colData <- as.data.frame(condition)
+rownames(my_colData) <- colnames(raw_counts)
+head(my_colData)
+```
+<img width="403" height="166" alt="image" src="https://github.com/user-attachments/assets/ec27a164-296d-42fc-ae7d-f592caf6b5c0" />
 
 
 
