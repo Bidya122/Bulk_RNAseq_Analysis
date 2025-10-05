@@ -334,6 +334,8 @@ multiqc fastqc_results/ -o multiqc_report/
 ```
 <img width="940" height="204" alt="image" src="https://github.com/user-attachments/assets/2b4fb960-a3f0-48fc-a65d-effd3f6b3c80" />  
 
+Quality assessment was performed using FastQC on one representative sample (LNCAP_Hypoxia_S1) to demonstrate the QC workflow. My objective was to get familiarize with the tool and interpret the major metrics (per-base sequence quality, GC content, and adapter contamination). The FastQC report indicated high-quality reads across all positions with no adapter contamination. Therefore, trimming was not required for this or other samples. This decision ensured data integrity was preserved and unnecessary processing was avoided.  
+The summary reports for all samples confirmed consistent sequencing quality, allowing the pipeline to proceed directly to alignment.  
 
 **Please find the fastqc and multiqc html files on this repository in the Output > Qualitycheck folder** 
 [Results of QC](/Output/Qualitycheck)  
@@ -419,6 +421,7 @@ nano hisat2alignment.sh
 chmod +x hisat2alignment.sh
 ./hisat2alignment.sh
 ```
+After running HISAT2, I evaluated the mapping efficiency for each sample using the alignment summary reports. All samples aligned efficiently to the reference genome, confirming the integrity and quality of the RNA-seq libraries. In a standard workflow, any sample with a mapping rate below 85–90% would be rechecked for adapter contamination or reference mismatch.  
 **FASTQ → (HISAT2) → SAM → (Samtools sort) → BAM → (Samtools index) → BAM + BAI**  
 
 <img width="940" height="148" alt="image" src="https://github.com/user-attachments/assets/a2530284-2fc2-4857-93a4-acccd54e50b5" />  
@@ -562,6 +565,13 @@ sudo systemctl status rstudio-server
 **-------- Downstream Processing for Differential Gene Expression Analysis Begins now on R -----------**
 # **9. DOWNSTREAM_ANALYSIS**
 
+```bash
+#to run featurecounts using .sh script
+raw_counts <- read.csv("GSE106305_counts_matrix.csv", header = TRUE, row.names = "Geneid", stringsAsFactors = FALSE)  
+head(raw_counts)
+```
+
+<img width="972" height="286" alt="image" src="https://github.com/user-attachments/assets/8aa101a4-bc3b-4747-861c-af773974715a" />
 
 
 
