@@ -566,6 +566,17 @@ sudo systemctl status rstudio-server
 # **9. DOWNSTREAM_ANALYSIS**
 
 ```bash
+#to install and load the libraries and set working directory
+install.packages("BiocManager")
+BiocManager::install(version = "devel")
+BiocManager::install("DESeq2")
+library("DESeq2")
+install.packages("tidyverse")
+library("tidyverse")
+setwd("D:/BIDYA")
+```
+
+```bash
 #to load the counts matrix file
 raw_counts <- read.csv("GSE106305_counts_matrix.csv", header = TRUE, row.names = "Geneid", stringsAsFactors = FALSE)  
 head(raw_counts)
@@ -597,6 +608,30 @@ head(my_colData)
 ```
 <img width="403" height="166" alt="image" src="https://github.com/user-attachments/assets/ec27a164-296d-42fc-ae7d-f592caf6b5c0" />
 
+To perform differential expression analysis using DESeq2, I first created a DESeqDataSet object using raw count data and sample metadata. This object serves as the foundation for downstream analysis.
+```bash
+#create DESeq2 dataset
+dds <- DESeqDataSetFromMatrix(countData = raw_counts,
+                              colData = my_colData,
+                              design = ~condition)
+dds  ##inspect dataset 
+head(counts(dds)) ##preview and check dataset dimensions
+dim(counts(dds))
+```
+<img width="1494" height="573" alt="image" src="https://github.com/user-attachments/assets/3f91073d-5734-4830-9d00-ea6f43df2905" /> 
+
+Before proceeding with normalization and differential expression testing, I examined how many genes have zero counts in each sample. This step helps identify lowly or non-expressed genes that may be removed to reduce noise. 
+
+```bash
+#Quality check
+count_matrix <- counts(dds) ##Extracts the raw count matrix from the DESeq2 object dds. Rows = genes, Columns = samples.  
+dim(count_matrix) ##Returns the dimensions of the count matrix.
+zero_counts_per_gene <- rowSums(count_matrix == 0) ##This line calculates the number of zero counts per gene across all samples.  
+count_matrix <- as.data.frame(count_matrix) ##Converts the matrix to a data frame
+zero_summary <- table(zero_counts_per_gene) ##Creates a frequency table showing how many genes have a given number of zero counts.
+print(zero_summary)
+```
+<img width="994" height="223" alt="image" src="https://github.com/user-attachments/assets/ac4109cb-c688-41f9-9cdd-4185014861fb" />  
 
 
 
