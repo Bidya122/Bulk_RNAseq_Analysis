@@ -873,8 +873,50 @@ plotMA(res_lncap)
 <img width="1017" height="661" alt="image" src="https://github.com/user-attachments/assets/27c212ca-3d50-46cd-b14b-abbe23809017" />
 The MA-plot visualizes the relationship between the mean expression (average counts) and the log2 fold changes of genes when comparing LNCAP cells under hypoxia versus normoxia conditions. The x-axis (A) represents the average normalized expression level of each gene across all samples. The y-axis (M) shows the log2 fold change in expression between hypoxia and normoxia conditions. Each point corresponds to a gene. Genes with significant differential expression (adjusted p-value < 0.05) are typically highlighted in blue, indicating upregulated or downregulated genes under hypoxia.
 
+-This step highlights genes that are significantly up- or downregulated between hypoxia and normoxia in LNCAP cells. The volcano plot combines fold change and significance to help quickly spot important genes. This aids in focusing on candidates for further study and understanding the biological response to hypoxia.
 
+```bash
+# Assuming res_lncap is DESeq2 results object:
+reslncapOrdered <- res_lncap[order(res_lncap$padj), ]
 
+# Convert to dataframe
+res_df <- as.data.frame(reslncapOrdered)
+res_df <- na.omit(res_df)
+res_df$gene <- rownames(res_df)
+
+# Categorize genes by regulation status
+res_df$regulation <- "Not Significant"
+res_df$regulation[res_df$padj < 0.05 & res_df$log2FoldChange > 1] <- "Upregulated"
+res_df$regulation[res_df$padj < 0.05 & res_df$log2FoldChange < -1] <- "Downregulated"
+
+# Load ggplot2
+library(ggplot2)
+
+# Plot volcano plot
+volcano_plot <- ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj), color = regulation)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("Upregulated" = "#FEA405", 
+                                "Downregulated" = "purple", 
+                                "Not Significant" = "gray")) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "black") +
+  annotate("text", x = min(res_df$log2FoldChange), y = -log10(0.05) + 0.5,
+           label = "padj = 0.05", hjust = 0, size = 3) +
+  theme_minimal() +
+  labs(title = "Volcano Plot of Differential Expression in LNCAP Cells",
+       x = "Log2 Fold Change",
+       y = "-Log10 Adjusted P-Value") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Save plot
+ggsave("vp_lncap.png", plot = volcano_plot, width = 8, height = 6, dpi = 300)
+```
+<img width="817" height="613" alt="image" src="https://github.com/user-attachments/assets/05acf681-9c4a-48ef-8dab-0a3801c7f053" />  
+The volcano plot visualizes gene expression changes between hypoxia and normoxia conditions. The x-axis shows the log2 fold change, indicating how much a gene’s expression increases or decreases. The y-axis shows the statistical significance (adjusted p-value) of those changes.  
+Genes with large positive fold changes and low p-values (top right) are significantly upregulated.  
+Genes with large negative fold changes and low p-values (top left) are significantly downregulated.  
+Genes near the center or bottom are not significantly changed.  
+
+- To investigate the biological pathways affected by hypoxia in LNCaP cells, I prepared gene sets from the MSigDB Hallmark collection using the msigdbr R package. This step is essential to perform pathway-level enrichment analysis with tools like FGSEA, which helps identify key molecular processes altered under hypoxic conditions.
 
 
 
