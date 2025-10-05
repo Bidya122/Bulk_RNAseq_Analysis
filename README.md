@@ -633,7 +633,70 @@ print(zero_summary)
 ```
 <img width="994" height="223" alt="image" src="https://github.com/user-attachments/assets/ac4109cb-c688-41f9-9cdd-4185014861fb" />  
 
+To enhance interpretability of the raw RNA-seq counts, I merged Ensembl gene IDs with metadata from a GRCh38 annotation file. I removed version numbers from Ensembl IDs to ensure accurate matching, then used a left join to attach gene symbols and biotypes to each row in the count matrix. This allowed me to generate a streamlined, annotated dataset suitable for downstream analysis and visualization.
 
+```bash
+#Gene annotation join and Cleanup
+annotation_file <- "GRCh38annotation.csv" ##Loads gene annotation file that we made
+annotation <- fread(annotation_file, stringsAsFactors = FALSE) 
+counts_gse <- read.csv("GSE106305_counts_matrix.csv",
+                     header = TRUE,
+                     stringsAsFactors = FALSE) ##Loads the raw count matrix 
+
+counts_gse$Geneid <- sub("\\..*$", "", counts_gse$Geneid)
+annotation$Geneid <- sub("\\..*$", "", annotation$Geneid) ##removes the version numbers so both files have matching geneids  
+annotated_counts <- left_join(counts_gse, annotation, by = "Geneid") %>%  ##performs the joining of both files
+  select(Geneid, Genesymbol, Genebiotype, 
+         LNCAP_Hypoxia_S1, LNCAP_Hypoxia_S2, LNCAP_Normoxia_S1, LNCAP_Normoxia_S2, 
+         PC3_Hypoxia_S1, PC3_Hypoxia_S2, PC3_Normoxia_S1, PC3_Normoxia_S2)  ##keeps only these columns
+```
+<img width="1648" height="561" alt="image" src="https://github.com/user-attachments/assets/0419c09d-7210-4faf-9586-190c53ca8fe1" />  
+
+To improve the quality and interpretability of downstream analyses, I applied a two-step filtering approach on the annotated count matrix:  
+Biotype filtering:  
+I retained genes belonging to biologically relevant categories including protein-coding genes and immune-related gene types (immunoglobulin and T-cell receptor genes). This reduces noise from uninformative or poorly annotated gene biotypes.
+Expression filtering:  
+Genes with zero counts across all samples were removed to focus the analysis on genes that are at least minimally expressed. This step enhances statistical power and reduces computational burden.  
+```bash
+#Two step filtering
+biotypes_to_keep <- c("protein_coding", "IG_J_gene", "IG_V_gene", "IG_C_gene", "IG_D_gene", "TR_D_gene", "TR_C_gene", "TR_V_gene", "TR_J_gene") ##gene biotypes I want to keep  
+
+filtered_counts <- annotated_counts %>%
+  filter(Genebiotype %in% biotypes_to_keep)  ##keeps only rows that matches the biotypes above
+
+filtered_counts$Geneid <- sub("\\..*$", "", filtered_counts$Geneid)
+head(filtered_counts, n = 3)  ##Strips Ensembl version suffixes from Geneid again, just in case!!
+
+output_file <- "9biotype_count_matrix.csv"  ##Saves the filtered count matrix (only chosen biotypes) to a CSV file
+fwrite(filtered_counts, file = output_file, sep = ",", row.names = FALSE)
+zero_counts1 <- rowSums(filtered_counts[, 4:11] == 0)  ##Counts how many samples have zero counts per gene.
+zero_summary2 <- table(zero_counts1)
+print(zero_summary2) 
+
+############## filtering 2 steps
+keep_genes <- zero_counts1 < 7  ##Keeps genes that have counts in at least one sample (i.e., less than 7 zeros across 7 samples)
+filtered_counts_nozero <- filtered_counts[keep_genes, ]   
+cat("Number of genes after filtering (zeros in <7 samples):", nrow(filtered_counts_nozero), "\n")
+
+new_zero_counts <- rowSums(filtered_counts_nozero[, 4:11] == 0)  ##Recalculates zero count summary after filtering.
+cat("New zero counts distribution:\n")
+print(table(new_zero_counts))
+
+output_file <- "filtered_biotype_nozero_count_matrix.csv"  ##Exports the dataset after both filters: biotype and zero counts.
+fwrite(filtered_counts_nozero, file = output_file, sep = ",", row.names = FALSE)
+
+head(filtered_counts_nozero, n = 3)
+
+dds_filtered <- dds[rownames(dds) %in% filtered_counts_nozero$gene_id, ]  ##Keeps only rows (genes) in the original DESeq2 object dds that passed filters. rownames(dds) are gene IDs.
+
+cat("Dimensions of filtered DESeqDataSet:", dim(dds_filtered), "\n")
+
+removed_genes <- filtered_counts[!keep_genes, ]  ##Gets the genes that were filtered out because they had zeros in all samples. So we know we are not losing anything important in the filteration step
+cat("Biotype distribution of removed genes:\n")
+print(table(removed_genes$gene_biotype))
+```
+
+ 
 
 
 
