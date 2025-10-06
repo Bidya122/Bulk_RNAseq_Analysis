@@ -568,6 +568,7 @@ sudo systemctl status rstudio-server
 ```bash
 #to install and load the libraries and set working directory
 install.packages("BiocManager")
+BiocManager::install(version = "3.21", ask = FALSE, update = FALSE)
 BiocManager::install(version = "devel")
 BiocManager::install("DESeq2")
 library("DESeq2")
