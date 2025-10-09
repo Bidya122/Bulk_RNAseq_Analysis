@@ -568,15 +568,31 @@ sudo systemctl status rstudio-server
 ```bash
 #to install and load the libraries and set working directory
 install.packages("BiocManager")
-BiocManager::install(version = "3.21", ask = FALSE, update = FALSE)
-BiocManager::install(version = "devel")
 BiocManager::install("DESeq2")
 library("DESeq2")
 install.packages("tidyverse")
 library("tidyverse")
 setwd("D:/BIDYA")
 ```
-
+If any version error comes up then try:
+```bash
+getwd()
+setwd("C:\\Users\\HP\\Desktop\\bulk_rna_seq")  # to set path
+install.packages("BiocManager") 
+BiocManager::install(version = "3.22", ask = FALSE, update = FALSE, force = TRUE)
+BiocManager::install(
+  c("DESeq2", "SummarizedExperiment", "GenomicRanges", 
+    "IRanges", "S4Vectors", "MatrixGenerics"),ask = FALSE, update = TRUE)
+##download rtools from https://cran.r-project.org/
+BiocManager::install("GenomicRanges", version = "3.22", ask = FALSE, force = TRUE)
+BiocManager::install("SummarizedExperiment", version = "3.22", ask = FALSE, force = TRUE)
+BiocManager::install("DESeq2", version = "3.22", ask = FALSE, update = TRUE)
+library(DESeq2)
+install.packages("tidyverse")
+library(tidyverse)
+library(dplyr)
+library(tibble)
+```
 ```bash
 #to load the counts matrix file
 raw_counts <- read.csv("GSE106305_counts_matrix.csv", header = TRUE, row.names = "Geneid", stringsAsFactors = FALSE)  
@@ -612,14 +628,17 @@ head(my_colData)
 - To perform differential expression analysis using DESeq2, I first created a DESeqDataSet object using raw count data and sample metadata. This object serves as the foundation for downstream analysis.
 ```bash
 #create DESeq2 dataset
-dds <- DESeqDataSetFromMatrix(countData = raw_counts,
-                              colData = my_colData,
-                              design = ~condition)
+dds <- DESeqDataSetFromMatrix(countData = raw_counts, ##gene expression matrix (rows = genes, columns = samples)
+                              colData = my_colData,  ##metadata table describing each sample
+                              design = ~condition)   ##specifies the experimental design formula, telling DESeq2 how to model the data
 dds  ##inspect dataset 
 head(counts(dds)) ##preview and check dataset dimensions
 dim(counts(dds))
 ```
-<img width="1494" height="573" alt="image" src="https://github.com/user-attachments/assets/3f91073d-5734-4830-9d00-ea6f43df2905" /> 
+<img width="1494" height="573" alt="image" src="https://github.com/user-attachments/assets/3f91073d-5734-4830-9d00-ea6f43df2905" />   
+
+DESeqDataSet object = a special container that stores counts + metadata + model design. For example, if you have two conditions (“control” and “treated”), this formula means:
+“Find genes whose expression changes with condition.”
 
 - Before proceeding with normalization and differential expression testing, I examined how many genes have zero counts in each sample. This step helps identify lowly or non-expressed genes that may be removed to reduce noise. 
 
@@ -674,7 +693,7 @@ zero_counts1 <- rowSums(filtered_counts[, 4:11] == 0)  ##Counts how many samples
 zero_summary2 <- table(zero_counts1)
 print(zero_summary2) 
 
-############## filtering 2 steps
+############## filtering 2nd step
 keep_genes <- zero_counts1 < 7  ##Keeps genes that have counts in at least one sample (i.e., less than 7 zeros across 7 samples)
 filtered_counts_nozero <- filtered_counts[keep_genes, ]   
 cat("Number of genes after filtering (zeros in <7 samples):", nrow(filtered_counts_nozero), "\n")
@@ -716,15 +735,20 @@ keep_genes <- zero_counts < 7
 filtered_counts_nozero <- filtered_counts[keep_genes, ]  ##Keeps genes expressed(non-zero) in at least 2 samples(since fewer than 7 zeros).
 cat("Number of genes after filtering (zeros in <7 samples):", nrow(filtered_counts_nozero), "\n")
 
-new_zero_counts <- rowSums(filtered_counts_nozero[, 4:11] == 0  ##Counts zeros again in the filtered dataset to check the new distribution
+# Count zeros again in the filtered dataset to check the new distribution
+new_zero_counts <- rowSums(filtered_counts_nozero[, 4:11] == 0)
 print(table(new_zero_counts))
 
-output_file <- "filtered_biotype_6.csv"  ##filtered count matrix to a CSV file
+# Save the filtered count matrix to a CSV file
+output_file <- "filtered_biotype_6.csv"
 fwrite(filtered_counts_nozero, file = output_file, sep = ",", row.names = FALSE)
 
-head(filtered_counts_nozero, n = 3) 
+# Preview first 3 rows
+head(filtered_counts_nozero, n = 3)
 
-dds_filtered <- dds[rownames(dds) %in% filtered_counts_nozero$Geneid, ]  ##Filters the original DESeq2 dataset (dds) to keep only genes that passed the zero-count filtering.
+# Filter the original DESeq2 dataset (dds) to keep only genes that passed the zero-count filtering
+dds_filtered <- dds[rownames(dds) %in% filtered_counts_nozero$Geneid, ]
+
 ```
 
 <img width="1527" height="234" alt="image" src="https://github.com/user-attachments/assets/a0e78145-979d-4b78-bc7e-393461615d1e" />  
@@ -752,6 +776,7 @@ p
 output_plot <- "genebiotype_proportions1.png"
 ggsave(output_plot, plot = p, width = 8, height = 6, dpi = 300)
 ```
+<img width="781" height="215" alt="image" src="https://github.com/user-attachments/assets/c0d7319a-af46-42cb-b047-ec7061b81326" />  
 
 <img width="1351" height="693" alt="image" src="https://github.com/user-attachments/assets/c2d84e33-eacb-4471-90d8-1e233e7192bc" />  
 As shown in the plot, the most abundant gene biotype in the experiment is protein_coding, indicating that the majority of retained genes after filtering are protein-coding genes.
@@ -760,8 +785,8 @@ As shown in the plot, the most abundant gene biotype in the experiment is protei
 ```bash
 vsd <- vst(dds_filtered, blind = TRUE)  # blind=TRUE for exploratory PCA  ##transforms the filtered DESeq2 data for variance stabilization, which is good for PCA  
 plot_PCA = function (vsd.obj) {
-  pcaData <- plotPCA(vsd.obj,  intgroup = c("condition"), returnData = T)
-  percentVar <- round(100 * attr(pcaData, "percentVar"))
+  pcaData <- plotPCA(vsd.obj,  intgroup = c("condition"), returnData = TRUE) ##computes PCA on the top 500 most variable genes by default.
+  percentVar <- round(100 * attr(pcaData, "percentVar")) ##shows how much total variance each principal component explains (e.g., PC1 = 45%, PC2 = 25%).
   ggplot(pcaData, aes(PC1, PC2, color=condition)) +
     geom_point(size=3) +
     labs(x = paste0("PC1: ",percentVar[1],"% variance"),
@@ -776,8 +801,10 @@ plot_PCA(vsd)
 dev.off()
 using ntop=500 top features by variance  ##selecting the 500 genes (features) with the highest variability across samples
 ```
-<img width="612" height="607" alt="image" src="https://github.com/user-attachments/assets/6c25f946-c855-40bc-917c-4a98d1da89f4" /> 
-The PCA plot reveals distinct clustering of samples according to their experimental conditions, indicating that the treatment strongly influences gene expression profiles. For example, samples under hypoxia cluster separately from normoxia, reflecting biological differences captured by the data. The close grouping of replicates confirms good experimental consistency. No obvious outliers were observed, suggesting reliable data quality.It explains nearly 99% of the variance, clearly separates samples based on the hypoxia condition. This strong separation indicates that hypoxia has a major impact on gene expression, driving most of the variability in the dataset.
+<img width="612" height="607" alt="image" src="https://github.com/user-attachments/assets/6c25f946-c855-40bc-917c-4a98d1da89f4" />   
+
+vst() = Variance Stabilizing Transformation, RNA-seq counts are highly skewed (low counts have higher variance).
+vst() normalizes and log-transforms them in a way that makes variance roughly constant across expression levels. The PCA plot reveals distinct clustering of samples according to their experimental conditions, indicating that the treatment strongly influences gene expression profiles. For example, samples under hypoxia cluster separately from normoxia, reflecting biological differences captured by the data. The close grouping of replicates confirms good experimental consistency. No obvious outliers were observed, suggesting reliable data quality.It explains nearly 99% of the variance, clearly separates samples based on the hypoxia condition. This strong separation indicates that hypoxia has a major impact on gene expression, driving most of the variability in the dataset.
 
 - I performed differential expression analysis on the filtered dataset using the DESeq2 pipeline. After fitting the model with DESeq(), I extracted the normalized count data to correct for library size and sequencing depth differences. The normalized counts were saved as a CSV file for downstream analyses and reporting.
 ```bash
@@ -788,7 +815,8 @@ normalized_counts_df <- as.data.frame(normalized_counts)
 write.csv(normalized_counts_df, file = "normalized_counts.csv", row.names = TRUE)
 ```
 <img width="1382" height="356" alt="image" src="https://github.com/user-attachments/assets/26b8def1-abd9-4797-ad6d-22f5a32fe528" /> 
-This only carried the gene ids, if needed can be joined with gene annotation file like earlier
+This only carried the gene ids, if needed can be joined with gene annotation file like earlier. This is the normalized counts. we can’t directly compare raw counts between samples because because: some samples may have more total reads (sequencing depth differences), gene expression variance can depend on library size or composition.
+So one sample might look like it has “more expression,” just because it was sequenced more deeply — not because biology changed. DESeq2 scales each sample to make them comparable. It computes a “size factor” for each sample: This adjusts for library size and composition bias, Then divides raw counts by these factors → producing normalized counts.
 
 - I generated a sample-to-sample distance heatmap using variance-stabilized data to assess the similarity between samples. The heatmap shows hierarchical clustering of samples based on Euclidean distances, confirming expected grouping by experimental condition (e.g., hypoxia vs. normoxia).
 ```bash
