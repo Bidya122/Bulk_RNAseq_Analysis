@@ -815,11 +815,28 @@ normalized_counts_df <- as.data.frame(normalized_counts)
 write.csv(normalized_counts_df, file = "normalized_counts.csv", row.names = TRUE)
 ```
 <img width="1382" height="356" alt="image" src="https://github.com/user-attachments/assets/26b8def1-abd9-4797-ad6d-22f5a32fe528" /> 
-This only carried the gene ids, if needed can be joined with gene annotation file like earlier. This is the normalized counts. we can’t directly compare raw counts between samples because because: some samples may have more total reads (sequencing depth differences), gene expression variance can depend on library size or composition.
-So one sample might look like it has “more expression,” just because it was sequenced more deeply — not because biology changed. DESeq2 scales each sample to make them comparable. It computes a “size factor” for each sample: This adjusts for library size and composition bias, Then divides raw counts by these factors → producing normalized counts.
+This only carried the gene ids, if needed can be joined with gene annotation file like earlier. This is the normalized counts as I can’t directly compare raw counts between samples  because: some samples may have more total reads (sequencing depth differences), gene expression variance can depend on library size or composition.
+So one sample might look like it has “more expression”, just because it was sequenced more deeply — not because biology changed. DESeq2 scales each sample to make them comparable. It computes a “size factor” for each sample: This adjusts for library size and composition bias, Then divides raw counts by these factors → producing normalized counts.
 
 - I generated a sample-to-sample distance heatmap using variance-stabilized data to assess the similarity between samples. The heatmap shows hierarchical clustering of samples based on Euclidean distances, confirming expected grouping by experimental condition (e.g., hypoxia vs. normoxia).
 ```bash
+vsd <- vst(dds, blind = TRUE)  # blind=TRUE for exploratory PCA
+plot_PCA = function (vsd.obj) {
+  pcaData <- plotPCA(vsd.obj,  intgroup = c("condition"), returnData = T)
+  percentVar <- round(100 * attr(pcaData, "percentVar"))
+  ggplot(pcaData, aes(PC1, PC2, color=condition)) +
+    geom_point(size=3) +
+    labs(x = paste0("PC1: ",percentVar[1],"% variance"),
+         y = paste0("PC2: ",percentVar[2],"% variance"),
+         title = "PCA Plot colored by condition") +
+    ggrepel::geom_text_repel(aes(label = name), color = "black")
+}
+
+png(filename = "pcaa.png", 
+    width = 2000, height = 2000, res = 300)  # adjust width/height as needed
+plot_PCA(vsd)
+dev.off()
+
 vsd <- vst(dds, blind = TRUE) ##Applies variance-stabilizing transformation
 plotDists = function (vsd.obj) {
   sampleDists <- dist(t(assay(vsd.obj))) ##Computes Euclidean distances between samples using the transformed data (columns = samples)
@@ -833,7 +850,11 @@ plotDists(vsd)
 dev.off()
 ```
 <img width="676" height="609" alt="image" src="https://github.com/user-attachments/assets/51a5333a-8ee7-4cda-8357-9b6932c1f25b" />  
-A sample-to-sample distance heatmap was generated using variance-stabilized transformed (VST) expression data. The Euclidean distances between samples reveal strong clustering by cell line (LNCaP vs. PC3) and condition (Hypoxia vs. Normoxia). Replicates within each group (e.g., LNCAP_Hypoxia_S1 and S2) show high similarity (darker blue), confirming consistency. Additionally, the dendrogram clearly separates LNCaP and PC3 groups, validating distinct transcriptional profiles across cell lines.
+A sample-to-sample distance heatmap was generated using variance-stabilized transformed (VST) expression data. The Euclidean distances between samples reveal strong clustering by cell line (LNCaP vs. PC3) and condition (Hypoxia vs. Normoxia). Replicates within each group (e.g., LNCAP_Hypoxia_S1 and S2) show high similarity (darker blue), confirming consistency. Additionally, the dendrogram clearly separates LNCaP and PC3 groups, validating distinct transcriptional profiles across cell lines.  
+As we see two PCA plots,   
+pcab.png — Pre-normalization PCA: Generated using variance-stabilized counts from the filtered dataset (dds_filtered). This step was performed to visualize the overall structure of the data after filtering and to ensure that low-count gene removal did not distort sample clustering.  
+pcaa.png — Post-normalization PCA: Generated using the fully normalized dataset (dds) after DESeq2 model fitting. This represents the final PCA visualization, showing accurate clustering of samples based on true biological variation after normalization and variance stabilization.  
+
 
 ```bash
 variable_gene_heatmap <- function (vsd.obj, num_genes = 40, annotation, title = "") {
@@ -880,30 +901,74 @@ dev.off()
 
 The heatmap displays the expression patterns of the top variable genes across different samples or conditions. Each row corresponds to a highly variable gene, and each column represents a sample. The color intensity reflects the normalized expression level of each gene in each sample, with the color scale indicating relative expression (e.g., blue for low expression, red for high expression). Clustering of rows (genes) and columns (samples) reveals groups of genes with similar expression profiles and samples with similar gene expression patterns, respectively. This visualization helps identify distinct gene expression signatures associated with specific conditions or sample groups, highlighting potentially important genes for further biological interpretation.
 
-- The MA-plot visualizes differential expression results by plotting the log2 fold change (M) of each gene against its average normalized expression (A). It helps to identify genes that are significantly up- or down-regulated between the hypoxia and normoxia conditions in the LNCAP samples. Genes with significant adjusted p-values are highlighted to show the most relevant changes.
+In the next step I Analyzed RNA-seq data from LNCaP prostate cancer cells using DESeq2 to identify genes differentially expressed under hypoxia. Post-analysis, ENSEMBL gene IDs were mapped to gene symbols to produce a biologically interpretable table of significant up- and down-regulated genes for visualization and pathway analysis.
 ```bash
-dds_lncap <- dds[, grepl("LNCAP", colnames(dds))]   ##subset the DESeqDataSet (dds) to keep only samples with "LNCAP" in their column names
-dds_lncap
-dds_lncap$condition <- droplevels(dds_lncap$condition)  ##Removes unused factor levels in the condition variable, so only relevant ones remain.
-dds_lncap$condition <- relevel(dds_lncap$condition, ref = "LNCAP_Normoxia")   ##Sets the reference level for the condition factor to "LNCAP_Normoxia" which means means comparisons will be made relative to this baseline.
+library(DESeq2)
+library(tidyverse)
+
+# Subset LNCAP samples
+dds_lncap <- dds[, grepl("LNCAP", colnames(dds))]
+
+# Drop unused factor levels
+dds_lncap$condition <- droplevels(dds_lncap$condition)
+
+# Set reference level
+dds_lncap$condition <- relevel(dds_lncap$condition, ref = "LNCAP_Normoxia")
+
+# Run DESeq2
 dds_lncap <- DESeq(dds_lncap)
 
-res_lncap <- results(dds_lncap, contrast = c("condition", "LNCAP_Hypoxia", "LNCAP_Normoxia"))  ##Extracts the results comparing LNCAP_Hypoxia vs LNCAP_Normoxia conditions.
-res_lncap
-summary(res_lncap)
-# res0.01 <- results(dds, alpha = 0.5)
-# summary(res0.01)
-sum(reslncapOrdered$padj < 0.05, na.rm = TRUE)
+# Get results for Hypoxia vs Normoxia
+res_lncap <- results(dds_lncap, contrast = c("condition", "LNCAP_Hypoxia", "LNCAP_Normoxia"))
+
+# Order by adjusted p-value
 reslncapOrdered <- res_lncap[order(res_lncap$padj), ]
+
+# Count significant genes (FDR < 0.05)
+sum(reslncapOrdered$padj < 0.05, na.rm = TRUE)
+
+# Quick look at top DEGs
 head(reslncapOrdered)
+
+# Summary
 summary(reslncapOrdered)
+
+# Save results to CSV
 write.csv(as.data.frame(reslncapOrdered), file = "DEGs_lncap.csv")
-plotMA(res_lncap)
+library(org.Hs.eg.db)
+library(AnnotationDbi)
+
+# Get gene symbols for ENSEMBL IDs
+gene_symbols <- mapIds(org.Hs.eg.db,
+                       keys = rownames(reslncapOrdered),
+                       column = "SYMBOL",
+                       keytype = "ENSEMBL",
+                       multiVals = "first")
+
+# Add gene symbols to results
+reslncapOrdered$gene <- gene_symbols
+
+# View top DEGs with gene names
+head(reslncapOrdered)
+write.csv(as.data.frame(reslncapOrdered), file = "DEGs_lncap_with_genes.csv", row.names = TRUE)
+```
+<img width="754" height="491" alt="image" src="https://github.com/user-attachments/assets/2e0b1203-a69e-4f3e-8a41-7d7aecbda76b" />  
+
+<img width="817" height="189" alt="image" src="https://github.com/user-attachments/assets/2e89dcda-85a9-44d2-9148-0ffbcb0e8287" />
+
+The RNA-seq differential expression analysis in LNCaP prostate cancer cells under hypoxia versus normoxia using DESeq2. Mapped ENSEMBL IDs to gene symbols to generate a biologically interpretable table. Identified key hypoxia-responsive genes, including PLOD2, STC1, AKAP12, and CYP11A1, with strong upregulation (log₂FC > 3.5, FDR < 0.05), reflecting cellular adaptation to hypoxic stress. These results provide a foundation for pathway and functional analyses.
+
+- Further, The MA-plot visualizes differential expression results by plotting the log2 fold change (M) of each gene against its average normalized expression (A). It helps to identify genes that are significantly up- or down-regulated between the hypoxia and normoxia conditions in the LNCAP samples. Genes with significant adjusted p-values are highlighted to show the most relevant changes. From the above results, I generated a MA plot. 
+```bash
+plotMA(res_lncap, main = "MA-plot: LNCAP Hypoxia vs Normoxia", ylim = c(-5, 5))
+png("MA_plot_LNCAP.png", width = 1200, height = 1000, res = 150)  # open PNG device
+plotMA(res_lncap, main = "MA-plot: LNCAP Hypoxia vs Normoxia", ylim = c(-5, 5))
+dev.off()
 ```
 <img width="1017" height="661" alt="image" src="https://github.com/user-attachments/assets/27c212ca-3d50-46cd-b14b-abbe23809017" />
 The MA-plot visualizes the relationship between the mean expression (average counts) and the log2 fold changes of genes when comparing LNCAP cells under hypoxia versus normoxia conditions. The x-axis (A) represents the average normalized expression level of each gene across all samples. The y-axis (M) shows the log2 fold change in expression between hypoxia and normoxia conditions. Each point corresponds to a gene. Genes with significant differential expression (adjusted p-value < 0.05) are typically highlighted in blue, indicating upregulated or downregulated genes under hypoxia.
 
--This step highlights genes that are significantly up- or downregulated between hypoxia and normoxia in LNCAP cells. The volcano plot combines fold change and significance to help quickly spot important genes. This aids in focusing on candidates for further study and understanding the biological response to hypoxia.
+-This next step highlights genes that are significantly up- or downregulated between hypoxia and normoxia in LNCAP cells. The volcano plot combines fold change and significance to help quickly spot important genes. This aids in focusing on candidates for further study and understanding the biological response to hypoxia.
 
 ```bash
 # Assuming res_lncap is DESeq2 results object:
@@ -941,12 +1006,580 @@ volcano_plot <- ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj), color =
 ggsave("vp_lncap.png", plot = volcano_plot, width = 8, height = 6, dpi = 300)
 ```
 <img width="817" height="613" alt="image" src="https://github.com/user-attachments/assets/05acf681-9c4a-48ef-8dab-0a3801c7f053" />  
+
 The volcano plot visualizes gene expression changes between hypoxia and normoxia conditions. The x-axis shows the log2 fold change, indicating how much a gene’s expression increases or decreases. The y-axis shows the statistical significance (adjusted p-value) of those changes.  
 Genes with large positive fold changes and low p-values (top right) are significantly upregulated.  
 Genes with large negative fold changes and low p-values (top left) are significantly downregulated.  
 Genes near the center or bottom are not significantly changed.  
 
-- To investigate the biological pathways affected by hypoxia in LNCaP cells, I prepared gene sets from the MSigDB Hallmark collection using the msigdbr R package. This step is essential to perform pathway-level enrichment analysis with tools like FGSEA, which helps identify key molecular processes altered under hypoxic conditions.
+- Performed differential gene expression analysis in LNCAP prostate cancer cells under hypoxia versus normoxia using DESeq2. Subsetting to LNCAP allowed analysis of hypoxia-specific transcriptional changes without confounding effects from other cell lines like PC3 in this study, which dominate variance in PCA. Generated  heatmaps to visualize top differentially expressed genes. 
+```bash
+# ================================
+# Heatmap of top DEGs for LNCAP
+# ================================
+
+library(DESeq2)
+library(dplyr)
+library(pheatmap)
+library(RColorBrewer)
+library(data.table)
+
+# --- Parameters ---
+padj_cutoff <- 0.001
+ngenes <- 30
+annotation_file <- "GRCh38annotation.csv"  # your annotation file
+
+# --- Load annotation and counts ---
+annotation <- fread(annotation_file, stringsAsFactors = FALSE)
+
+# Ensure IDs are consistent (remove version numbers)
+annotation$Geneid <- sub("\\..*$", "", annotation$Geneid)
+normalized_counts <- counts(dds_lncap, normalized = TRUE)
+rownames(normalized_counts) <- sub("\\..*$", "", rownames(normalized_counts))
+
+# --- Map Gene IDs to Symbols ---
+gene_map <- setNames(annotation$Genesymbol, annotation$Geneid)
+
+# --- Order DEGs by adjusted p-value ---
+reslncapOrdered <- res_lncap[order(res_lncap$padj), ]
+
+# --- Select top significant genes ---
+top_genes <- rownames(reslncapOrdered)[reslncapOrdered$padj < padj_cutoff][1:ngenes]
+top_genes_clean <- sub("\\..*$", "", top_genes)  # remove versions if any
+
+# --- Map to gene symbols and make unique ---
+gene_labels <- gene_map[top_genes_clean]
+gene_labels <- as.character(gene_labels)
+gene_labels[is.na(gene_labels)] <- top_genes_clean[is.na(gene_labels)]
+gene_labels <- make.unique(gene_labels)
+
+# --- Subset normalized counts ---
+top_counts <- normalized_counts[top_genes, ]
+
+# --- Scale rows (z-score) ---
+top_counts_scaled <- t(scale(t(top_counts)))
+rownames(top_counts_scaled) <- gene_labels
+
+# --- Color palette ---
+brewer_palette <- "RdBu"
+ramp <- colorRampPalette(RColorBrewer::brewer.pal(11, brewer_palette))
+mr <- ramp(256)[256:1]  # reversed blue -> red
+
+# --- Save heatmap as PNG ---
+png("DEG_heatmap_LNCAP.png", width = 1200, height = 900, res = 150)
+pheatmap(top_counts_scaled,
+         color = mr,
+         cluster_rows = TRUE,
+         cluster_cols = TRUE,
+         fontsize_col = 10,
+         fontsize_row = max(6, 200/ngenes),
+         border_color = NA,
+         main = paste("Top", ngenes, "DE Genes (padj <", padj_cutoff, ")"))
+dev.off()
+```
+<img width="908" height="680" alt="image" src="https://github.com/user-attachments/assets/d9b3da51-7e1b-4821-8974-ceeeea5895ce" />  
+
+- Next, To assess sample quality and prepare for downstream analysis, I extracted raw counts and variance-stabilized transformed (VST) counts from DESeq2 objects. Density plots were generated for each sample to visualize distribution differences, demonstrating that VST effectively stabilized variance across highly expressed and lowly expressed genes. This step ensured the data was normalized and comparable across samples, forming a solid foundation for differential expression and clustering analyses.
+
+```bash
+# Extract raw counts from DESeq2 object
+raw_counts <- assay(dds)  
+
+# Extract variance-stabilized counts from VST object
+vst_counts <- assay(vsd)  
+
+# Open a PNG device to save the plots
+# width, height in pixels; res = resolution in dpi
+png("C:\\Users\\HP\\Desktop\\bulk_rna_seq\\density_plots_raw_vst.png",
+    width = 4000, height = 4000, res = 300)  
+
+# Set plotting layout: 4 rows x 4 columns of plots
+# 'mar' sets margins: bottom, left, top, right
+par(mfrow = c(4, 4), mar = c(3, 3, 2, 1))  
+
+# Loop over the first 8 samples
+for (i in 1:8) {
+  # --- Plot density of raw counts for the i-th sample ---
+  plot(density(raw_counts[, i]),
+       main = paste("Raw - Sample", colnames(raw_counts)[i]),  # Title of the plot
+       xlab = "Expression",  # Label x-axis
+       col = "red",          # Red color for raw counts
+       lwd = 2,              # Line width
+       ylim = c(0, max(sapply(1:8, function(j) max(density(raw_counts[, j])$y, na.rm = TRUE))))
+       # Set uniform y-axis across all raw counts plots
+       )
+  
+  # --- Plot density of VST counts for the i-th sample ---
+  plot(density(vst_counts[, i]),
+       main = paste("VST - Sample", colnames(vst_counts)[i]),  # Title of the plot
+       xlab = "Expression",  # Label x-axis
+       col = "blue",         # Blue color for VST counts
+       lwd = 2,              # Line width
+       ylim = c(0, max(sapply(1:8, function(j) max(density(vst_counts[, j])$y, na.rm = TRUE))))
+       # Set uniform y-axis across all VST plots
+       )
+}
+
+# Close the PNG device and save the plots to file
+dev.off()
+```
+<img width="677" height="682" alt="image" src="https://github.com/user-attachments/assets/2a12c4d6-a573-4b02-a96e-9c9882719503" />  
+
+Density plots of raw and variance-stabilized (VST) RNA-seq counts demonstrate the effect of variance stabilization. Raw counts are highly skewed and vary greatly across samples, whereas VST-transformed counts produce comparable, bell-shaped distributions, facilitating reliable downstream analysis such as differential expression, PCA, and clustering.
+
+- Next, I conducted pathway-level functional analysis on LNCaP RNA-seq data by first mapping Ensembl gene IDs to Entrez IDs using clusterProfiler and the org.Hs.eg.db annotation database. A ranked gene list based on log2 fold change was generated and analyzed through Gene Set Enrichment Analysis (GSEA) with ReactomePA to uncover significantly enriched biological pathways. The analysis incorporated multiple testing correction and pathway size filtering, and the results, including normalized enrichment scores and adjusted p-values, were systematically extracted for interpretation. This workflow demonstrates proficiency in R programming, Bioconductor tools, and advanced functional genomics analysis.
+
+```bash
+res_lncap <- read.csv("DEGs_lncap.csv", row.names = 1)
+head(res_lncap)
+# Install BiocManager if not already installed
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+# Install clusterProfiler from Bioconductor
+BiocManager::install("clusterProfiler", version = "3.22", ask = FALSE, update = TRUE)
+
+# Load the package
+library(clusterProfiler)
+BiocManager::install("org.Hs.eg.db", version = "3.22", ask = FALSE, update = TRUE)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(dplyr)
+library(stats)
+BiocManager::install("ReactomePA", version = "3.22", ask = FALSE, update = TRUE)
+library(ReactomePA)
+ncbi_list <- clusterProfiler::bitr(
+  geneID = rownames(res_lncap),        # use Ensembl IDs from row names
+  fromType = "ENSEMBL",          
+  toType = "ENTREZID", 
+  OrgDb = org.Hs.eg.db
+)
+
+res_lncap$ENSEMBL <- rownames(res_lncap)
+
+res_mapped <- res_lncap %>%
+  left_join(ncbi_list, by = "ENSEMBL") %>%
+  filter(!is.na(ENTREZID)) %>%
+  distinct(ENTREZID, .keep_all = TRUE)
+
+ngenes <- res_mapped$log2FoldChange
+names(ngenes) <- res_mapped$ENTREZID
+ngenes <- sort(ngenes, decreasing = TRUE)
+
+library(ReactomePA)
+enp_gsea <- gsePathway( ngenes, organism = "human", pvalueCutoff = 0.05, verbose = FALSE)
+head(enp_gsea@result)
+enp_gsea2 <- gsePathway(ngenes, organism = "human", pvalueCutoff = 0.05, pAdjustMethod = "BH", minGSSize = 10, maxGSSize = 500, verbose = FALSE)
+# Save the GSEA result to CSV
+gsea_result <- enp_gsea2@result
+
+write.csv(gsea_result, file = "GSEA_Reactome_results.csv", row.names = FALSE)
+```
+
+<img width="936" height="191" alt="image" src="https://github.com/user-attachments/assets/403f4f93-a0b8-4d03-9fe7-f2886ba8f834" />  
+
+Gene Set Enrichment Analysis of the LNCaP RNA-seq dataset revealed several significantly enriched Reactome pathways, highlighting key cellular processes. Notably, pathways related to rRNA processing in the nucleus and cytosol, translation, and amino acid metabolism were among the top hits, reflecting active regulation of protein synthesis and cellular metabolic response. These results demonstrate the ability to integrate differential expression data with pathway-level functional analysis to uncover biologically meaningful patterns.  
+
+```bash
+enp_gsea <- clusterProfiler::setReadable(enp_gsea, OrgDb = org.Hs.eg.db, keyType = "ENTREZID")
+
+pathways <- enp_gsea@result
+pathways <- pathways[order(pathways$p.adjust), ]  # Sort by FDR (adjusted p-value)
+top_pathways <- pathways[order(abs(pathways$NES), decreasing = TRUE), ]  # Sort by NES
+
+library(dplyr)
+library(forcats)
+
+top20 <- top_pathways[1:20, ] %>%
+  mutate(Description = fct_reorder(Description, NES))  # Reorder factor for y-axis
+
+write.csv(top20, "top20_pathways.csv", row.names = FALSE)
+```
+<img width="1343" height="456" alt="image" src="https://github.com/user-attachments/assets/fbc624e8-63ea-47a0-b2a0-1f1097fb052e" />  
+
+We can see the saved .csv file with the top 20 pathways. To visualize the results of the Reactome GSEA, I generated a bubble plot of the top enriched pathways using ggplot2. Each pathway is represented by a bubble, where the x-axis shows the normalized enrichment score (NES), bubble color indicates statistical significance (adjusted p-value), and bubble size represents the number of genes in the pathway. This visualization highlights the most significantly enriched biological processes and provides an intuitive overview of pathway-level enrichment, combining aesthetics with clarity for downstream interpretation. The plot was exported as a high-resolution image for presentation and reporting purposes.
+
+<img width="1133" height="677" alt="image" src="https://github.com/user-attachments/assets/bd6bf09e-faab-41b0-ba59-e3e90d3d1fe8" />  
+
+- Then I performed a Over-Representation Analysis test whether these significant genes are over-represented in certain pathways compared to all genes.
+```bash
+library(ReactomePA)
+sig_genes <- res_mapped %>%
+  filter(padj < 0.1, abs(log2FoldChange) > 0.5) %>%
+  pull(ENTREZID)
+enr <- enrichPathway(gene = sig_genes, organism = "human", pvalueCutoff = 0.1)
+dotplot(enr, showCategory=20)
+dp <- dotplot(enr, showCategory = 20)
+ggsave(
+  filename = "ReactomePA_dotplot.png",
+  plot = dp,
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+```
+<img width="679" height="680" alt="image" src="https://github.com/user-attachments/assets/6e412a2e-5980-4cb0-a7c5-22d48d19681b" />  
+
+To investigate pathway-level alterations in LNCaP RNA-seq data, I performed two complementary Reactome-based analyses. First, Gene Set Enrichment Analysis (GSEA) was conducted using a ranked gene list of all genes based on log2 fold change. This approach identifies pathways enriched at the extremes of the ranked list, capturing coordinated trends even among genes that are not individually significant. The results were visualized as a bubble plot, with the normalized enrichment score (NES) on the x-axis, pathway names on the y-axis, bubble size representing gene set size, and color indicating statistical significance.
+
+Second, I conducted Over-Representation Analysis (ORA) using only significantly altered genes (adjusted p-value < 0.1 and |log2 fold change| > 0.5). ORA tests whether these genes are over-represented in specific Reactome pathways compared to all genes in the background. The top enriched pathways were visualized with a dot plot, where dot size represents the number of significant genes in the pathway and color reflects the statistical significance.
+
+By performing both GSEA and ORA, I captured a comprehensive view of pathway-level changes: GSEA highlights subtle, coordinated changes across all genes, while ORA emphasizes pathways dominated by strongly significant genes. This dual approach, combined with clear, publication-quality visualizations, demonstrates proficiency in R, Bioconductor tools, and advanced functional genomics analysis.  
+
+- I developed a custom R function to visualize the expression of individual genes from RNA-seq data across experimental conditions. The function allows flexible input as a gene symbol, Ensembl ID, or dataset row index, and supports both DESeq2-normalized counts and counts-per-million (CPM). For a selected gene, expression values are extracted, combined with sample condition information, and plotted as a boxplot overlaid with individual data points for clear visualization of variability. The resulting plots are publication-ready and can be exported as high-resolution images, enabling effective presentation and interpretation of gene-level expression patterns.
+- 
+ ```bash
+# Define a function to plot expression of a specific gene from a DESeq2 object
+plot_counts <- function (dds, gene, normalization = "DESeq2"){
+  
+  # Load gene annotation file that maps Ensembl IDs to gene symbols
+  annotation <- read.csv("GRCh38annotation.csv", header = T, stringsAsFactors = F)
+  
+  # Choose normalization method
+  if (normalization == "cpm") {
+    # Counts per million (CPM) normalization
+    normalized_data <- cpm(counts(dds, normalized = F)) 
+  } else if (normalization == "DESeq2")
+    # Use DESeq2 normalized counts
+    normalized_data <- counts(dds, normalized = T) 
+  
+  # Extract sample condition information from DESeq2 object
+  condition <- dds@colData$condition
+  
+  # Determine the Ensembl ID for the gene input
+  if (is.numeric(gene)) { 
+    # If numeric input, treat as row index
+    if (gene%%1==0 )
+      ensembl_id <- rownames(normalized_data)[gene]
+    else
+      stop("Invalid index supplied.")
+  } else if (gene %in% annotation$Genesymbol){ 
+    # If input is a gene symbol, map to Ensembl ID
+    ensembl_id <- annotation$Geneid[which(annotation$Genesymbol == gene)]
+  } else if (gene %in% annotation$Geneid){
+    # If input is already Ensembl ID, use as-is
+    ensembl_id <- gene
+  } else {
+    # Stop if gene cannot be found
+    stop("Gene not found. Check spelling.")
+  }
+  
+  # Extract normalized expression values for the gene
+  expression <- normalized_data[ensembl_id,]
+  
+  # Get the gene symbol corresponding to the Ensembl ID
+  gene_name <- annotation$Genesymbol[which(annotation$Geneid == ensembl_id)]
+  
+  # Combine expression and condition into a tidy tibble for plotting
+  gene_tib <- tibble(condition = condition, expression = expression)
+  
+  # Create a boxplot of gene expression across conditions
+  ggplot(gene_tib, aes(x = condition, y = expression))+
+    geom_boxplot(outlier.size = NULL)+    # Boxplot of expression
+    geom_point()+                         # Overlay individual points
+    labs (
+      title = paste0("Expression of ", gene_name, " - ", ensembl_id),  # Plot title
+      x = "group", 
+      y = paste0("Normalized expression (", normalization , ")")        # Y-axis label
+    )+
+    theme(
+      axis.text.x = element_text(size = 11), 
+      axis.text.y = element_text(size = 11)                               # Axis text size
+    )
+}
+
+# Plot expression of the gene "IGFBP1"
+plot_counts(dds, "IGFBP1")
+
+# Assign the plot to a variable for saving
+p <- plot_counts(dds, "IGFBP1")
+
+# Save the plot as a high-resolution PNG
+ggsave(
+  filename = "IGFBP1_expression_plot.png",  # File name
+  plot = p,                                 # ggplot object
+  width = 6,                                # Width in inches
+  height = 5,                               # Height in inches
+  dpi = 300                                 # Resolution
+)
+```
+<img width="816" height="679" alt="image" src="https://github.com/user-attachments/assets/4f1c28fa-06fc-4ea5-8893-5d29360f903b" />  
+
+It takes a particular gene (by symbol, Ensembl ID, or row number) and extracts its normalized expression values from your RNA-seq dataset. Then it shows how that gene is expressed across all experimental conditions or sample groups using a boxplot with individual points.This allows you to see patterns like: Which condition has higher or lower expression, Variability within each group, Outliers in the data.
+
+
+- For the LNCaP RNA-seq dataset, I prepared a ranked gene list suitable for Gene Set Enrichment Analysis (GSEA) using the fgsea package. MSigDB Hallmark pathways were imported as reference gene sets, and differential expression results were processed to remove missing values. A two-column ranked table of genes and log2 fold changes was generated, with duplicate genes averaged and ordered by decreasing fold change. The data frame was then converted into a named vector compatible with fgsea, enabling pathway-level analysis of coordinated gene expression changes. This was done To investigate the biological pathways affected by hypoxia in LNCaP cells, I prepared gene sets from the MSigDB Hallmark collection using the msigdbr R package. This step is essential to perform pathway-level enrichment analysis with tools like FGSEA, which helps identify key molecular processes altered under hypoxic conditions.
+
+```bash
+library(fgsea)
+hallmark_pathway <- gmtPathways("h.all.v7.0.symbols.gmt.txt")
+head(names(hallmark_pathway))
+head(hallmark_pathway$HALLMARK_HYPOXIA, 20)
+# Make sure you have your DESeq2 results
+res <- results(dds)
+
+# remove NA values
+rnk_df <- res_lncap[!is.na(res_lncap$log2FoldChange), ]
+
+# create a two-column ranked list
+rnk <- data.frame(
+  Gene = rownames(rnk_df),
+  Score = rnk_df$log2FoldChange
+)
+
+# save as tab-delimited .rnk file
+write.table(rnk, "lncaprank.rnk", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+
+
+lncap_ranked_list <- read.table("lncaprank.rnk", header = T, stringsAsFactors = F)
+head(lncap_ranked_list)
+prepare_ranked_list <- function(ranked_list) { 
+  if( sum(duplicated(ranked_list$Gene.name)) > 0) {
+    ranked_list <- aggregate(.~Gene.name, FUN = mean, data = ranked_list)
+    ranked_list <- ranked_list[order(ranked_list$log2FoldChange, decreasing = T),]
+  }
+  ranked_list <- na.omit(ranked_list)
+  ranked_list <- tibble::deframe(ranked_list)
+  ranked_list
+}
+
+lncap_ranked_list <- prepare_ranked_list(lncap_ranked_list)
+head(lncap_ranked_list)
+```
+<img width="595" height="197" alt="image" src="https://github.com/user-attachments/assets/3c4412ef-c6a2-4ed7-bdcb-a162c62d50f4" />  
+
+I generated a ranked gene list from DESeq2 differential expression results, where each gene is represented by its Ensembl ID and corresponding log2 fold change. This list was prepared for Gene Set Enrichment Analysis (GSEA), allowing pathway-level analysis to identify biological processes enriched among genes that are most up- or down-regulated. The ranked format ensures compatibility with tools like fgsea, enabling systematic identification of coordinated transcriptional changes across the dataset.
+
+- Next, I developed a function to prepare ranked gene lists for pathway analysis from DESeq2 differential expression results. The function handles duplicate genes by averaging their log2 fold changes, removes missing values, and orders genes by decreasing expression change. It then converts the data frame into a named numeric vector compatible with GSEA tools such as fgsea. This workflow ensures robust preprocessing of RNA-seq results for pathway-level enrichment analysis, demonstrating proficiency in data wrangling, reproducibility, and functional genomics analysis in R.
+```bash
+# Define a function to prepare a ranked gene list for GSEA
+prepare_ranked_list <- function(ranked_list) {
+  
+  # If input is already a vector (not a list), return it as-is
+  if (is.vector(ranked_list) && !is.list(ranked_list)) {
+    return(ranked_list)
+  }
+
+  # Stop execution if input is not a data frame
+  if (!is.data.frame(ranked_list)) {
+    stop("Input 'ranked_list' must be a data frame with 'Gene.name' and 'log2FoldChange' columns.")
+  }
+
+  # Handle duplicate gene entries by averaging their values
+  if (sum(duplicated(ranked_list$Gene.name)) > 0) {
+    ranked_list <- aggregate(. ~ Gene.name, data = ranked_list, FUN = mean)
+    # Order the genes by decreasing log2 fold change
+    ranked_list <- ranked_list[order(ranked_list$log2FoldChange, decreasing = TRUE), ]
+  }
+
+  # Remove any NA values from the ranked list
+  ranked_list <- na.omit(ranked_list)
+
+  # Convert the data frame to a named vector (gene names as names, log2FC as values)
+  ranked_list <- tibble::deframe(ranked_list[, c("Gene.name", "log2FoldChange")])
+
+  # Return the processed ranked list
+  return(ranked_list)
+}
+
+# If 'lncap_ranked_list' does not exist, create it from DESeq2 results
+if (!exists("lncap_ranked_list")) {
+  # Convert DESeq2 results to a data frame and select relevant columns
+  lncap_ranked_list <- as.data.frame(res_lncap) %>%
+    dplyr::select(Gene.name = gene_symbol, log2FoldChange)  # Adjust column names as needed
+}
+
+# Apply the function to prepare a ranked gene vector for GSEA
+lncap_ranked_list <- prepare_ranked_list(lncap_ranked_list)
+
+# Print the top entries of the ranked list to inspect
+print(head(lncap_ranked_list))
+```
+
+<img width="813" height="76" alt="image" src="https://github.com/user-attachments/assets/c4d81f54-f9da-4716-b797-32e6a75d7864" />  
+
+- This chunk performs GSEA using fgsea on LNCaP RNA-seq results: it prepares a ranked gene list, runs enrichment analysis against Hallmark pathways, and visualizes the top 10 enriched pathways in a clear bar plot for publication or presentation.
+
+```bash
+# Load required libraries
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(fgsea)
+library(ggplot2)
+library(dplyr)
+
+# --------------------------------------------
+# STEP 1: Prepare ranked list
+# --------------------------------------------
+# Assuming 'res_lncap' is your DESeq2 results table with log2FoldChange
+rnk_df <- res_lncap[!is.na(res_lncap$log2FoldChange), ]
+ngenes <- rnk_df$log2FoldChange
+names(ngenes) <- rownames(rnk_df)
+
+# Convert Ensembl IDs to gene symbols
+lncap_symbols <- bitr(
+  names(ngenes),
+  fromType = "ENSEMBL",
+  toType = "SYMBOL",
+  OrgDb = org.Hs.eg.db
+)
+
+# Merge Ensembl and SYMBOL mappings
+ngenes <- ngenes[lncap_symbols$ENSEMBL]
+names(ngenes) <- lncap_symbols$SYMBOL
+
+# Clean ranked list (remove NAs, duplicates, sort decreasing)
+ngenes <- ngenes[!is.na(names(ngenes))]
+ngenes <- ngenes[!duplicated(names(ngenes))]
+ngenes <- sort(ngenes, decreasing = TRUE)
+
+# --------------------------------------------
+# STEP 2: Load Hallmark pathways
+# --------------------------------------------
+gmt_file <- "h.all.v7.0.symbols.gmt"
+
+if (!file.exists(gmt_file)) {
+  download.file(
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/7.0/h.all.v7.0.symbols.gmt",
+    destfile = gmt_file
+  )
+}
+
+hallmark_pathways <- gmtPathways(gmt_file)
+
+# --------------------------------------------
+# STEP 3: Run fgsea
+# --------------------------------------------
+set.seed(123)  # for reproducibility
+fgsea_res <- fgsea(
+  pathways = hallmark_pathways,
+  stats = ngenes,
+  minSize = 15,
+  maxSize = 500,
+  nperm = 1000
+)
+
+# Order results by NES
+fgsea_res_ordered <- fgsea_res[order(-fgsea_res$NES), ]
+head(fgsea_res_ordered[, c("pathway", "padj", "NES")])
+
+# --------------------------------------------
+# STEP 4: Plot top pathways
+# --------------------------------------------
+# Top 10 enriched pathways
+topPathways <- fgsea_res_ordered$pathway[1:10]
+
+# Plot NES for top pathways
+ggplot(fgsea_res_ordered %>% filter(pathway %in% topPathways),
+       aes(x = reorder(pathway, NES), y = NES, fill = NES > 0)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c("red", "blue"), guide = FALSE) +
+  labs(title = "Top 10 Hallmark Pathways (fgsea)",
+       x = "Pathway",
+       y = "Normalized Enrichment Score (NES)") +
+  theme_minimal()
+
+# Optional: save plot
+ggsave("fgsea_top10_pathways.png", width = 8, height = 6)
+```
+<img width="908" height="675" alt="image" src="https://github.com/user-attachments/assets/0b9b6b2f-926c-4c06-92c3-1273119b0971" />  
+
+<img width="609" height="187" alt="image" src="https://github.com/user-attachments/assets/f7e6a57e-157b-43b9-83ec-fcf3426b44e7" />  
+
+From the fgsea analysis on LNCaP RNA-seq data, several Hallmark pathways were significantly enriched, including Hypoxia, Androgen Response, Glycolysis, Angiogenesis, EMT, and TGF-β signaling. Each pathway’s enrichment was quantified using the Normalized Enrichment Score (NES) and adjusted for multiple testing (padj < 0.05). The top pathway, Hypoxia, indicates strong upregulation of hypoxia-responsive genes, reflecting the key transcriptional changes under the experimental condition. These results highlight the coordinated activation of biologically relevant pathways and demonstrate the power of GSEA for functional interpretation of differential expression data.
+
+-Lastly, I implemented a custom waterfall plot function to visualize pathway-level enrichment from fgsea results on LNCaP RNA-seq data. The function processes GSEA output, shortens pathway names for readability, and highlights significantly enriched pathways (adjusted p-value < 0.05). NES values for all pathways are plotted as horizontal bars ranked by enrichment, providing an intuitive overview of transcriptional changes across key biological processes.  
+
+```bash
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+waterfall_plot <- function(fgsea_results, graph_title, save_path = NULL) {
+  p <- fgsea_results %>% 
+    mutate(
+      short_name = str_split_fixed(pathway, "_", 2)[,2],  # remove 'HALLMARK_'
+      sig = padj < 0.05
+    ) %>%
+    ggplot(aes(x = reorder(short_name, NES), y = NES, fill = sig)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      scale_fill_manual(values = c("TRUE" = "steelblue", "FALSE" = "grey70")) +
+      labs(
+        x = "Hallmark Pathway",
+        y = "Normalized Enrichment Score (NES)",
+        title = graph_title
+      ) +
+      theme_minimal() +
+      theme(
+        axis.text.y = element_text(size = 7),
+        plot.title = element_text(hjust = 0.5)
+      )
+  
+  # Save if path is provided
+  if (!is.null(save_path)) {
+    ggsave(filename = save_path, plot = p, width = 8, height = 6)
+  }
+  
+  return(p)
+}
+waterfall_plot(
+  fgsea_results = fgsea_res_ordered,
+  graph_title = "Hallmark pathways altered by hypoxia in LNCaP cells",
+  save_path = "fgsea_waterfall_plot.png"
+)
+```
+<img width="907" height="680" alt="image" src="https://github.com/user-attachments/assets/ad34fade-3fdd-4e82-8a3c-6cd8e11ed843" />  
+
+[DESeq2_tutorial_GSE106305.Rmd](/Data)  Find the RMD file here !!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
